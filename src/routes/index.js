@@ -6,6 +6,7 @@ import Income from '../components/Income';
 import Expenses from '../components/Expenses';
 import Planning from '../components/Planning';
 import Accounts from '../components/Accounts';
+import Reports from '../components/Reports';
 
 const routes = (
     <div>
@@ -14,6 +15,7 @@ const routes = (
         <Route path={Expenses.path} component={Expenses} />
         <Route path={Planning.path} component={Planning} />
         <Route path={Accounts.path} component={Accounts} />
+        <Route path={Reports.path} component={Reports} />
     </div>
 );
 

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import '../styles/Accounts.css';
+import 'styles/Accounts.css';
 
 class Accounts extends Component {
     static path = '/accounts';

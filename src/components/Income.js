@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import '../styles/Income.css';
+import 'styles/Income.css';
 
 class Income extends Component {
     static path = '/income';

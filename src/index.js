@@ -5,11 +5,11 @@ import { Route } from 'react-router';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import { syncHistoryWithStore } from 'react-router-redux';
-import configureStore from './store/configureStore';
+import configureStore from 'store/configureStore';
 
-import routes from './routes';
+import routes from 'routes';
 
-import './styles/index.css';
+import 'styles/index.css';
 
 const store = configureStore();
 const history = syncHistoryWithStore(createBrowserHistory(), store);

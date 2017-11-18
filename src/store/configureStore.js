@@ -1,5 +1,5 @@
 import { createStore, applyMiddleware } from 'redux';
-import rootReducer from '../reducers';
+import rootReducer from 'reducers';
 import { ping } from './enhancers/ping';
 import thunk from 'redux-thunk';
 
@@ -15,8 +15,8 @@ export default function configureStore(intitialState) {
         applyMiddleware(...middlewares));
 
     if (module.hot) {
-        module.hot.accept('../reducers', () => {
-            const nextRootReducer = require('../reducers').default;
+        module.hot.accept('reducers', () => {
+            const nextRootReducer = require('reducers').default;
             store.replaceReducer(nextRootReducer);
         });
     }

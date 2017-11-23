@@ -1,5 +1,7 @@
 import React from 'react';
-import { Route } from 'react-router';
+import { Switch, Redirect } from 'react-router';
+import PublicRoute from 'routes/PublicRoute';
+import PrivateRoute from 'routes/PrivateRoute';
 
 import App from 'components/App';
 import Income from 'components/Income';
@@ -8,15 +10,22 @@ import Planning from 'components/Planning';
 import Accounts from 'components/Accounts';
 import Reports from 'components/Reports';
 
+import Register from 'components/Register';
+import Login from 'components/Login';
+
 const routes = (
-    <div>
-        <Route path={App.path} component={App} />
-        <Route path={Income.path} component={Income} />
-        <Route path={Expenses.path} component={Expenses} />
-        <Route path={Planning.path} component={Planning} />
-        <Route path={Accounts.path} component={Accounts} />
-        <Route path={Reports.path} component={Reports} />
-    </div>
+    <Switch>
+        <PublicRoute exact path={Register.path} component={Register} />
+        <PublicRoute exact path={Login.path} component={Login} />
+        <Redirect exact from={App.path} to={Income.path} />
+        <App>
+            <PrivateRoute path={Income.path} component={Income} />
+            <PrivateRoute path={Expenses.path} component={Expenses} />
+            <PrivateRoute path={Planning.path} component={Planning} />
+            <PrivateRoute path={Accounts.path} component={Accounts} />
+            <PrivateRoute path={Reports.path} component={Reports} />
+        </App>
+    </Switch>
 );
 
 export default routes;

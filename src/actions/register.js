@@ -14,12 +14,12 @@ const registerRequest = request(REGISTER_REQUEST);
 const registerSuccess = success(REGISTER_SUCCESS);
 const registerFailure = failure(REGISTER_FAILURE, err => {console.log(err)});
 
-export const register = (email, username, password) => dispatch => {
+export const register = (email, password) => dispatch => {
     dispatch(registerRequest());
     return firebaseApp.auth().createUserWithEmailAndPassword(email, password)
-        .then(user => 
-            user.updateProfile({displayName: username})
-                .then(() => dispatch(registerSuccess()))
-                .then(() => user))
+        .then(user => {
+            dispatch(registerSuccess());
+            return user;
+        })
         .catch(err => dispatch(registerFailure(err)));
 };

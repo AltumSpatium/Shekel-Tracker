@@ -13,7 +13,6 @@ class Register extends Component {
 
         this.state= {
             email: '',
-            username: '',
             password: ''
         }
 
@@ -23,8 +22,8 @@ class Register extends Component {
 
     onSubmit(e) {
         e.preventDefault();
-        const { email, username, password } = this.state;
-        this.props.register(email, username, password)
+        const { email, password } = this.state;
+        this.props.register(email, password)
             .then(user => this.props.login(email, password))
             .then(() => {this.props.history.push('/')});
     }
@@ -36,7 +35,7 @@ class Register extends Component {
     }
 
     render() {
-        const { email, username, password } = this.state;
+        const { email, password } = this.state;
 
         return (
             <div className="Register">
@@ -44,7 +43,6 @@ class Register extends Component {
                     <h3>Register</h3>
                     <form className="" onSubmit={e => this.onSubmit(e)}>
                         <input type="text" name="email" value={email} onChange={e => this.onChange(e)} /><br />
-                        <input type="text" name="username" value={username} onChange={e => this.onChange(e)} /><br />
                         <input type="password" name="password" value={password} onChange={e => this.onChange(e)} /><br />
                         <button>Submit</button>
                     </form>

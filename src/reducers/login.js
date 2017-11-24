@@ -19,7 +19,7 @@ const login = (state = initialState, action) => {
             localStorage['stUser'] = JSON.stringify(action.payload);
             return { ...state, user: action.payload, loggingIn: false };
         case LOGIN_FAILURE:
-            return { ...state, loggingIn: false, error: 'Registration error' };
+            return { ...state, loggingIn: false, error: 'Logging error' };
         case LOGOUT:
             localStorage.removeItem('stUser');
             return state;

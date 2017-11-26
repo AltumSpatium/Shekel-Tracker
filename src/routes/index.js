@@ -4,17 +4,19 @@ import PublicRoute from 'routes/PublicRoute';
 import PrivateRoute from 'routes/PrivateRoute';
 
 import App from 'components/App';
-import Income from 'components/Income';
-import Expenses from 'components/Expenses';
-import Planning from 'components/Planning';
-import Accounts from 'components/Accounts';
-import Reports from 'components/Reports';
+import Income from 'components/income-page/Income';
+import Expenses from 'components/expenses-page/Expenses';
+import Planning from 'components/planning-page/Planning';
+import Accounts from 'components/accounts-page/Accounts';
+import Reports from 'components/reports-page/Reports';
 
-import Register from 'components/Register';
-import Login from 'components/Login';
+import Info from 'components/info-page/Info';
+import Register from 'components/register-page/Register';
+import Login from 'components/login-page/Login';
 
 const routes = (
     <Switch>
+        <PublicRoute exact path={Info.path} component={Info} />
         <PublicRoute exact path={Register.path} component={Register} />
         <PublicRoute exact path={Login.path} component={Login} />
         <Redirect exact from={App.path} to={Income.path} />

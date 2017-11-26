@@ -1,4 +1,4 @@
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
 import rootReducer from 'reducers';
 import { ping } from './enhancers/ping';
 import thunk from 'redux-thunk';
@@ -9,10 +9,15 @@ export default function configureStore(intitialState) {
         ping
     ];
 
+    const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
     const store = createStore(
         rootReducer,
         intitialState,
-        applyMiddleware(...middlewares));
+        composeEnhancers(
+            applyMiddleware(...middlewares)
+        )
+    );
 
     if (module.hot) {
         module.hot.accept('reducers', () => {

@@ -8,7 +8,7 @@ class Accounts extends Component {
     render() {
         return (
             <div className="Accounts">
-                Accounts page                
+                Accounts page
             </div>
         );
     }

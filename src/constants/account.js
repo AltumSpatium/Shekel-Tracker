@@ -1,0 +1,4 @@
+export const GET_ALL_ACCOUNTS = 'GET_ALL_ACCOUNTS';
+export const ADD_ACCOUNT = 'ADD_ACCOUNT';
+export const UPDATE_ACCOUNT = 'UPDATE_ACCOUNT';
+export const REMOVE_ACCOUNT = 'REMOVE_ACCOUNT';

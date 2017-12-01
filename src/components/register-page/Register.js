@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 import { login, register } from 'actions/auth';
 import UserForm from 'components/shared/UserForm';
 
@@ -14,7 +14,7 @@ class Register extends Component {
         register(email, password);
         // .then(user => this.props.login(email, password))
         // .then(() => {this.props.history.push('/')});
-        history.push('/income')
+        history.push('/income');
     }
 
     render() {

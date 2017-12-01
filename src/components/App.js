@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Menu, Button } from 'semantic-ui-react'
-import { login, logout } from 'actions/auth'
-import { linkSet } from 'constants/default'
+import { Menu, Button } from 'semantic-ui-react';
+import { login, logout } from 'actions/auth';
+import { linkSet } from 'constants/default';
 
 import 'styles/App.css';
 
@@ -13,9 +13,11 @@ class App extends Component {
     componentWillMount() {
         let user = localStorage['stUser'];
         if (user) {
-            const { email, password } = JSON.parse(user);
-            if (email && password) {
-                this.props.login(email, password);
+            //const { email, password } = JSON.parse(user);
+            user = JSON.parse(user);
+            //if (email && password) {
+            if (user) {
+                //this.props.login(email, password);
             }
         }
     }
@@ -27,10 +29,12 @@ class App extends Component {
     }
 
     render() {
-        const { user, logout } = this.props;
+        let { user, logout } = this.props;
+
+        user = JSON.parse(localStorage['stUser']);
         const links = user ? linkSet.USERS_LINKS : linkSet.GUESTS_LINKS;
         return (
-            <div className="App">
+            <div className='App'>
                 <Menu>
                     <Menu.Item header>Shekel Tracker</Menu.Item>
                     {

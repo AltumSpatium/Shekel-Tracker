@@ -7,7 +7,7 @@ class Planning extends Component {
 
     render() {
         return (
-            <div className="Planning">
+            <div className='Planning'>
                 Planning page
             </div>
         );

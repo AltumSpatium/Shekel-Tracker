@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Header } from 'semantic-ui-react';
 import { tableHeaders } from 'constants/default';
-import ReactTable from "react-table";
+import ReactTable from 'react-table';
 
 import 'styles/Expenses.css';
 
@@ -15,13 +15,13 @@ class Expenses extends Component {
 
     render() {
         return (
-            <div className="Expenses">
+            <div className='Expenses'>
                 <Header as='h1' textAlign='center'>Expenses page</Header>
                 <ReactTable
                     data={testData}
                     columns={tableHeaders.EXPENSES}
                     defaultPageSize={10}
-                    className="-striped -highlight"
+                    className='-striped -highlight'
                 />
             </div>
         );

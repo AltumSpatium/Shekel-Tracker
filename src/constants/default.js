@@ -1,3 +1,15 @@
+import React from 'react';
+
+const nameHeader = { Header: 'Name', accessor: 'name' };
+const categoryHeader = { Header: 'Category', accessor: 'category' };
+const dateHeader = { Header: 'Date', accessor: 'date' };
+const moneyHeader = { Header: 'Money', accessor: 'money' };
+const accountHeader = { Header: 'Account', accessor: 'account' };
+const actionsHeader = { 
+    Header: 'Actions', accessor: 'actions',
+    Cell: props => <div className='actions-cell'>{props.value}</div>
+};
+
 export const linkSet = {
     GUESTS_LINKS: [
         { path: '/login', name: 'Login' },
@@ -15,37 +27,36 @@ export const linkSet = {
 
 export const tableHeaders = {
     INCOME: [
-        { Header: 'Name', accessor: 'name' },
-        { Header: 'Category', accessor: 'category' },
-        { Header: 'Date', accessor: 'date' },
-        { Header: 'Money', accessor: 'money' },
-        { Header: 'Account', accessor: 'account' },
-        { Header: 'Actions', accessor: 'actions' },
+        nameHeader,
+        categoryHeader,
+        dateHeader,
+        moneyHeader,
+        accountHeader,
+        actionsHeader
     ],
 
     EXPENSES: [
-        { Header: 'Name', accessor: 'name' },
-        { Header: 'Category', accessor: 'category' },
-        { Header: 'Date', accessor: 'date' },
-        { Header: 'Money', accessor: 'money' },
-        { Header: 'Account', accessor: 'account' },
-        { Header: 'Actions', accessor: 'actions' },
+        nameHeader,
+        categoryHeader,
+        dateHeader,
+        moneyHeader,
+        accountHeader,
+        actionsHeader
     ],
 
     PLANNING: [
-        { Header: 'Name', accessor: 'name' },
-        { Header: 'Category', accessor: 'category' },
-        { Header: 'Date', accessor: 'date' },
-        { Header: 'Money', accessor: 'money' },
-        { Header: 'Account', accessor: 'account' },
-        { Header: 'Actions', accessor: 'actions' },
+        nameHeader,
+        categoryHeader,
+        dateHeader,
+        moneyHeader,
+        accountHeader,
+        actionsHeader
     ],
 
     ACCOUNTS: [
         { Header: 'Title', accessor: 'title' },
         { Header: 'Type', accessor: 'type' },
-        { Header: 'Date', accessor: 'date' },
-        { Header: 'Money', accessor: 'money' },
-        { Header: 'Actions', accessor: 'actions' },
-    ],
-}
+        moneyHeader,
+        actionsHeader
+    ]
+};

@@ -41,14 +41,14 @@ class UserForm extends Component {
                     <Form.Input
                         label='Email'
                         placeholder='Email'
-                        name="email"
+                        name='email'
                         value={email}
                         onChange={this.onChange}
                     />
                     <Form.Input
                         label='Password'
                         placeholder='Password'
-                        name="password"
+                        name='password'
                         value={password}
                         onChange={this.onChange}
                     />

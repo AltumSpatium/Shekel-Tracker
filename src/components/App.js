@@ -1,38 +1,34 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Menu, Button } from 'semantic-ui-react';
-import { login, logout } from 'actions/auth';
+import { logout } from 'actions/auth';
 import { linkSet } from 'constants/default';
 
 import 'styles/App.css';
 
+// TODO: Fix the problem with logout (there is not history prop in this.props)
+
 class App extends Component {
     static path = '/';
 
-    componentWillMount() {
-        let user = localStorage['stUser'];
-        if (user) {
-            //const { email, password } = JSON.parse(user);
-            user = JSON.parse(user);
-            //if (email && password) {
-            if (user) {
-                //this.props.login(email, password);
-            }
-        }
+    constructor() {
+        super();
+
+        this.logout = this.logout.bind(this);
     }
 
-    logout = () => {
+    logout() {
         const { logout, history } = this.props;
         history.push('/');
         logout();
     }
 
     render() {
-        let { user, logout } = this.props;
-
-        user = JSON.parse(localStorage['stUser']);
+        const user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : null;
         const links = user ? linkSet.USERS_LINKS : linkSet.GUESTS_LINKS;
+
         return (
             <div className='App'>
                 <Menu>
@@ -52,7 +48,7 @@ class App extends Component {
                                     color='teal'
                                     icon='log out'
                                     className='logout-button'
-                                    onClick={logout}
+                                    onClick={this.logout}
                                 />
                             </Menu.Menu>
                         ) : ''
@@ -66,12 +62,10 @@ class App extends Component {
 }
 
 const mapStateToProps = state => ({
-    isLoading: state.auth.isLoading,
-    user: state.auth.user,
+    isLoading: state.auth.isLoading
 });
 
 const mapDispatchToProps = dispatch => ({
-    login: (...userData) => dispatch(login(...userData)),
     logout: () => dispatch(logout()),
 });
 

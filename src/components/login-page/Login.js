@@ -11,9 +11,8 @@ class Login extends Component {
 
     onSubmit = (email, password) => {
         const { login, history } = this.props;
-        login(email, password);
-        // .then(() => this.props.history.push('/'));
-        history.push('/income');
+        login(email, password)
+            .then(() => history.push('/'));
     }
 
     render() {

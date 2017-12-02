@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import { Form, Checkbox, Button, Loader, Dimmer, Segment, Header } from 'semantic-ui-react';
 
+// TODO: Improve validation
+
 const errorMessages = {
     email: 'Email field must contain a valid email address!',
-    password: 'Password must be at least 6 characters long!'
+    password: 'Password must be at least 6 characters long!',
+    empty: 'This field must be filled!'
 };
 
 class UserForm extends Component {
@@ -14,28 +17,39 @@ class UserForm extends Component {
             email: '',
             password: '',
             isAgree: false,
-            emailError: false,
-            passwordError: false
+            emailError: '',
+            passwordError: ''
         };
     }
 
-    checkValidity(email, password) {
-        let emailError = false;
-        let passwordError = false;
-
-        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
-            emailError = true;
-        if (password.length < 6) passwordError = true;
-
-        this.setState({emailError, passwordError});
-        return !emailError && !passwordError;
+    checkValidity(name, value) {
+        let { emailError, passwordError } = this.state;
+        switch (name) {
+            case 'email':
+                if (!value) emailError = errorMessages.empty;
+                else if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value)) emailError = errorMessages.email;
+                else emailError = '';
+                setTimeout(() => this.setState({emailError}), 500);
+                break;
+            case 'password':
+                if (!value) passwordError = errorMessages.empty;
+                else if (value.length < 6) passwordError = errorMessages.password;
+                else passwordError = '';
+                setTimeout(() => this.setState({passwordError}), 500);
+                break;
+            default:
+                break;
+        }
     }
 
     onSubmit = (e) => {
         e.preventDefault();
         const { email, password } = this.state;
+        const { emailError, passwordError } = this.state;
 
-        if (this.checkValidity(email, password))
+        this.checkValidity('email', email);
+        this.checkValidity('password', password);
+        if (email && password && !emailError && !passwordError)
             this.props.onSubmit(email, password);
     }
 
@@ -43,6 +57,8 @@ class UserForm extends Component {
         const name = e.target.name;
         const value = e.target.value;
         this.setState({ [name]: value });
+
+        this.checkValidity(name, value);
     }
 
     isAgreeHandler = () => this.setState({ isAgree: !this.state.isAgree });
@@ -65,9 +81,9 @@ class UserForm extends Component {
                         name='email'
                         value={email}
                         onChange={this.onChange}
-                        error={this.state.emailError}
+                        error={!!this.state.emailError}
                     />
-                    {this.state.emailError ? <p className='errorMsg'>{errorMessages.email}</p> : ''}
+                    {this.state.emailError ? <p className='errorMsg'>{this.state.emailError}</p> : ''}
                     <Form.Input
                         label='Password'
                         placeholder='Password'
@@ -75,9 +91,9 @@ class UserForm extends Component {
                         value={password}
                         type='password'
                         onChange={this.onChange}
-                        error={this.state.passwordError}
+                        error={!!this.state.passwordError}
                     />
-                    {this.state.passwordError ? <p className='errorMsg'>{errorMessages.password}</p> : ''}
+                    {this.state.passwordError ? <p className='errorMsg'>{this.state.passwordError}</p> : ''}
                     {
                         title === 'Registration' ? (
                             <Form.Field>

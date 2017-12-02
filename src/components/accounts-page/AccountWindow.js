@@ -1,7 +1,14 @@
 import React, { Component } from 'react';
 import { Button, Input, Dropdown, Modal } from 'semantic-ui-react';
 
-// TODO: Add validation, add currency support, fix 'uncontrolled component warning with title input'
+// TODO: Improve validation, add currency support, fix 'uncontrolled component warning' with title input
+
+const errorMessages = {
+    titleLength: 'Title must be at least 4 characters long!',
+    title: 'Title can only contain Latin characters and numbers!',
+    money: 'Incorrect money value!',
+    empty: 'This field must be filled!'
+};
 
 const accountTypes = [
     {
@@ -25,14 +32,45 @@ class AccountWindow extends Component {
         this.state = {
             title: '',
             type: null,
-            money: ''
+            money: '',
+
+            titleError: '',
+            typeError: '',
+            moneyError: ''
         };
 
         this.onChange = this.onChange.bind(this);
     }
 
+    checkValidity(name, value) {
+        let { titleError, typeError, moneyError } = this.state;
+        switch (name) {
+            case 'title':
+                if (!value) titleError = errorMessages.empty;
+                else if (!/^[a-zA-Z0-9 ]+$/.test(value)) titleError = errorMessages.title;
+                else if (value.trim().length < 4) titleError = errorMessages.titleLength;
+                else titleError = '';
+                setTimeout(() => this.setState({titleError}), 500);
+                break;
+            case 'type':
+                if (!value) typeError = errorMessages.empty;
+                else typeError = '';
+                setTimeout(() => this.setState({typeError}), 500);
+                break;
+            case 'money':
+                if (value === '') moneyError = errorMessages.empty;
+                else if (!/^[0-9]+(\.[0-9]{1,2})?$/.test(value)) moneyError = errorMessages.money;
+                else moneyError = '';
+                setTimeout(() => this.setState({moneyError}), 500);
+                break;
+            default:
+                break;
+        }
+    }
+
     onChange(event, data) {
         this.setState({[data.name]: data.value});
+        this.checkValidity(data.name, data.value);
     }
 
     componentWillReceiveProps(newProps) {
@@ -40,16 +78,25 @@ class AccountWindow extends Component {
         this.setState({title, type, money});
     }
 
+
     render() {
         const { headerText, submitText, isOpen, onSubmit, onCancel } = this.props;
         const { title, type, money } = this.state;
 
         const onSubmitClick = () => {
-            onSubmit(this.state);
-            this.setState({title: '', type: '', money: ''});
+            const { titleError, typeError, moneyError } = this.state;
+            const { title, type, money } = this.state;
+
+            this.checkValidity('title', title);
+            this.checkValidity('type', type);
+            this.checkValidity('money', money);
+            if (title && type && money && !titleError && !typeError && !moneyError) {
+                onSubmit({title, type, money});
+                this.setState({title: '', type: '', money: '', titleError: '', typeError: '', moneyError: ''});
+            }
         };
         const onCancelClick = () => {
-            this.setState({title: '', type: '', money: ''});
+            this.setState({title: '', type: '', money: '', titleError: '', typeError: '', moneyError: ''});
             onCancel();
         };
 
@@ -64,14 +111,17 @@ class AccountWindow extends Component {
                     <div className='account-mw-fields'>
                         <Input 
                             label='Title' placeholder='Account title...' name='title'
-                            fluid value={title} onChange={this.onChange} /><br />
+                            fluid value={title} onChange={this.onChange} error={!!this.state.titleError} />
+                        {this.state.titleError ? <p className='errorMsg'>{this.state.titleError}</p> : ''}
                         <Dropdown 
                             placeholder='Select account type' name='type'
                             fluid selection options={accountTypes} value={type}
-                            onChange={this.onChange} /><br />
+                            onChange={this.onChange} error={!!this.state.typeError} />
+                        {this.state.typeError ? <p className='errorMsg'>{this.state.typeError}</p> : ''}
                         <Input
                             label='$' placeholder='Account money...' name='money' type='number'
-                            fluid value={money} onChange={this.onChange} /><br />
+                            fluid value={money} onChange={this.onChange} error={!!this.state.moneyError} />
+                        {this.state.moneyError ? <p className='errorMsg'>{this.state.moneyError}</p> : ''}
                     </div>
                     <div style={{textAlign: 'center'}}>
                         <Button positive onClick={onSubmitClick}>{submitText}</Button>

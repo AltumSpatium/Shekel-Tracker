@@ -23,7 +23,7 @@ export const login = (email, password) => dispatch => {
         .then(user => dispatch(loginSuccess(user)))
         .catch(err => {
             console.log('111,', err);
-            loginFailure(err);
+            dispatch(loginFailure(err));
         });
 };
 
@@ -36,5 +36,5 @@ export const register = (email, password) => dispatch => {
             dispatch(registerSuccess());
             return user;
         })
-        .catch(err => dispatch(registerFailure(err)));
+        .catch(err => {dispatch(registerFailure(err))});
 };

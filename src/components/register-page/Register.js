@@ -6,18 +6,27 @@ import UserForm from 'components/shared/UserForm';
 
 import 'styles/Register.css';
 
+const errorMessages = {
+    email: 'This email address is already taken!'
+};
+
 class Register extends Component {
     static path = '/register';
 
     onSubmit = (email, password) => {
         const { register, history } = this.props;
-        register(email, password);
-        // .then(user => this.props.login(email, password))
-        // .then(() => {this.props.history.push('/')});
-        history.push('/income');
+        register(email, password)
+            .then(user => {
+                if (user) return this.props.login(email, password)
+            })
+            .then(next => {
+                if (next) history.push('/')
+            });
     }
 
     render() {
+        const error = !!this.props.error
+
         return (
             <div className="Register">
                 <p>
@@ -29,6 +38,7 @@ class Register extends Component {
                     isLoading={this.props.isLoading}
                     onSubmit={this.onSubmit}
                 />
+                {error ? <p className='errorMsg'>{errorMessages.email}</p> : ''}
             </div>
         );
     }
@@ -36,6 +46,7 @@ class Register extends Component {
 
 const mapStateToProps = state => ({
     isLoading: state.auth.isLoading,
+    error: state.auth.error
 });
 
 const mapDispatchToProps = dispatch => ({

@@ -16,7 +16,7 @@ import {
 
 import 'styles/Accounts.css';
 
-const user = JSON.parse(localStorage['stUser']);
+const user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {}; // FIX DAT
 const accountsRef = firebaseApp.database().ref('accounts/' + user.uid);
 
 class Accounts extends Component {

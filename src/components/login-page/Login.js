@@ -6,16 +6,24 @@ import UserForm from 'components/shared/UserForm';
 
 import 'styles/Login.css';
 
+const errorMessages = {
+    email: 'This email address is not registered!'
+};
+
 class Login extends Component {
     static path = '/login';
 
     onSubmit = (email, password) => {
         const { login, history } = this.props;
         login(email, password)
-            .then(() => history.push('/'));
+            .then(next => {
+                if (next) history.push('/');
+            });
     }
 
     render() {
+        const error = !!this.props.error
+
         return (
             <div className='Login'>
                 <p>
@@ -27,13 +35,15 @@ class Login extends Component {
                     isLoading={this.props.isLoading}
                     onSubmit={this.onSubmit}
                 />
+                {error ? <p className='errorMsg'>{errorMessages.email}</p> : ''}
             </div>
         );
     }
 }
 
 const mapStateToProps = state => ({
-    isLoading: state.auth.isLoading
+    isLoading: state.auth.isLoading,
+    error: state.auth.error
 });
 
 const mapDispatchToProps = dispatch => ({

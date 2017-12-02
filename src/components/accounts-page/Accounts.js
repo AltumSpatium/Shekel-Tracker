@@ -10,12 +10,14 @@ import {
     getAllAccounts,
     addAccount,
     updateAccount,
-    removeAccount
+    removeAccount,
+    clearAccounts
 } from 'actions/account';
 
 import 'styles/Accounts.css';
 
-const accountsRef = firebaseApp.database().ref('accounts');
+const user = JSON.parse(localStorage['stUser']);
+const accountsRef = firebaseApp.database().ref('accounts/' + user.uid);
 
 class Accounts extends Component {
     static path = '/accounts';
@@ -40,6 +42,8 @@ class Accounts extends Component {
         let newItems = false;
         accountsRef.on('child_added', snapshot => {
             if (!newItems) return;
+
+
             const newAccount = {
                 id: snapshot.key,
                 ...snapshot.val()
@@ -58,6 +62,11 @@ class Accounts extends Component {
         });
         this.props.getAllAccounts()
             .then(() => { newItems = true });
+    }
+
+    componentWillUnmount() {
+        accountsRef.off();
+        this.props.clearAccounts();
     }
 
     addAccount(newAccount) {
@@ -153,7 +162,8 @@ const mapDispatchToProps = dispatch => ({
     getAllAccounts: () => dispatch(getAllAccounts()),
     addAccount: newAccount => dispatch(addAccount(newAccount)),
     updateAccount: updatedAccount => dispatch(updateAccount(updatedAccount)),
-    removeAccount: id => dispatch(removeAccount(id))
+    removeAccount: id => dispatch(removeAccount(id)),
+    clearAccounts: () => dispatch(clearAccounts())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Accounts);

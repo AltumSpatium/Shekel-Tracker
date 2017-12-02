@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Input, Dropdown, Modal } from 'semantic-ui-react';
 
-// TODO: Add validation, add currency support, fix 'uncontrolled component warning with title input',
-// fix the problem of multiple additions of a new account, when you switch page several times
+// TODO: Add validation, add currency support, fix 'uncontrolled component warning with title input'
 
 const accountTypes = [
     {

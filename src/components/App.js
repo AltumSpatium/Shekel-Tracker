@@ -8,10 +8,11 @@ import { linkSet } from 'constants/default';
 
 import 'styles/App.css';
 
-// TODO: Fix the problem with logout (there is not history prop in this.props)
-
 class App extends Component {
     static path = '/';
+    static contextTypes = {
+        router: PropTypes.object.isRequired
+    };
 
     constructor() {
         super();
@@ -20,9 +21,8 @@ class App extends Component {
     }
 
     logout() {
-        const { logout, history } = this.props;
-        history.push('/');
-        logout();
+        this.props.logout();
+        this.context.router.history.push('/');
     }
 
     render() {

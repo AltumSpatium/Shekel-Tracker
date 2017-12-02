@@ -2,7 +2,8 @@ import {
     GET_ALL_ACCOUNTS,
     ADD_ACCOUNT,
     UPDATE_ACCOUNT,
-    REMOVE_ACCOUNT
+    REMOVE_ACCOUNT,
+    CLEAR_ACCOUNTS
 } from 'constants/account';
 
 const initialState = {
@@ -25,6 +26,8 @@ const auth = (state = initialState, action) => {
         case REMOVE_ACCOUNT:
             const id = action.payload;
             return { ...state, accounts: state.accounts.filter(item => item.id !== id) };
+        case CLEAR_ACCOUNTS:
+                return { ...state, accounts: [] };
         default:
             return state;
     }

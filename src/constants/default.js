@@ -3,8 +3,8 @@ import React from 'react';
 const nameHeader = { Header: 'Name', accessor: 'name' };
 const categoryHeader = { Header: 'Category', accessor: 'category' };
 const dateHeader = { Header: 'Date', accessor: 'date' };
-const moneyHeader = { Header: 'Money', accessor: 'money' };
-const accountHeader = { Header: 'Account', accessor: 'account' };
+const moneyHeader = { Header: 'Money', accessor: 'displayMoney' };
+const accountHeader = { Header: 'Account', accessor: 'displayAccount' };
 const actionsHeader = { 
     Header: 'Actions', accessor: 'actions',
     Cell: props => <div className='actions-cell'>{props.value}</div>

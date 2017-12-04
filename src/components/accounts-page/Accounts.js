@@ -5,6 +5,7 @@ import { tableHeaders } from 'constants/default';
 import ActionsButtons from 'components/shared/ActionsButtons';
 import AccountWindow from 'components/accounts-page/AccountWindow';
 import firebaseApp from 'utils/firebase';
+import toggleModalWindow from 'utils/toggleModalWindow';
 import { connect } from 'react-redux';
 import {
     getAllAccounts,
@@ -17,7 +18,6 @@ import {
 import 'styles/Accounts.css';
 
 const user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {}; // FIX DAT
-const accountsRef = firebaseApp.database().ref('accounts/' + user.uid);
 
 class Accounts extends Component {
     static path = '/accounts';
@@ -32,17 +32,19 @@ class Accounts extends Component {
             accountId: null
         };
 
-        this.toggleModalWindow = this.toggleModalWindow.bind(this);
+        this.accountsRef = firebaseApp.database().ref('accounts/' + user.uid);
+
+        this.toggleModalWindow = toggleModalWindow.bind(this);
         this.addAccount = this.addAccount.bind(this);
         this.editAccount = this.editAccount.bind(this);
         this.removeAccount = this.removeAccount.bind(this);
+        this.removeRelatedRecords = this.removeRelatedRecords.bind(this);
     }
 
     componentWillMount() {
         let newItems = false;
-        accountsRef.on('child_added', snapshot => {
+        this.accountsRef.on('child_added', snapshot => {
             if (!newItems) return;
-
 
             const newAccount = {
                 id: snapshot.key,
@@ -50,53 +52,60 @@ class Accounts extends Component {
             };
             this.props.addAccount(newAccount);
         });
-        accountsRef.on('child_changed', snapshot => {
+        this.accountsRef.on('child_changed', snapshot => {
             const updatedAccount = {
                 id: snapshot.key,
                 ...snapshot.val()
             };
             this.props.updateAccount(updatedAccount);
         });
-        accountsRef.on('child_removed', snapshot => {
+        this.accountsRef.on('child_removed', snapshot => {
+            this.removeRelatedRecords(snapshot.key, 'income');
             this.props.removeAccount(snapshot.key);
         });
         this.props.getAllAccounts()
             .then(() => { newItems = true });
     }
 
+    removeRelatedRecords(accountId, recordName) {
+        const recordRef = firebaseApp.database().ref(recordName + '/' + user.uid);
+        recordRef.once('value', snapshot => {
+            snapshot.forEach(childSnapshot => {
+                if (childSnapshot.val().account === accountId)
+                    recordRef.child(childSnapshot.key).remove();
+            });
+        });
+    }
+
     componentWillUnmount() {
-        accountsRef.off();
+        this.accountsRef.off();
         this.props.clearAccounts();
     }
 
     addAccount(newAccount) {
-        accountsRef.push(newAccount);
-        this.toggleModalWindow('addWindow', null);
+        this.accountsRef.push(newAccount);
+        this.toggleModalWindow('addWindow', 'accountId');
     }
 
     editAccount(account) {
         const id = this.state.accountId;
-        accountsRef.child(id).update(account);
-        this.toggleModalWindow('editWindow', null);
+        this.accountsRef.child(id).update(account);
+        this.toggleModalWindow('editWindow', 'accountId');
     }
 
     removeAccount() {
         const id = this.state.accountId;
-        accountsRef.child(id).remove();
-        this.toggleModalWindow('removeWindow', null);
-    }
-
-    toggleModalWindow(windowName, accountId) {
-        const windowState = this.state[windowName];
-        this.setState({[windowName]: !windowState, accountId});
+        this.accountsRef.child(id).remove();
+        this.toggleModalWindow('removeWindow', 'accountId');
     }
 
     render() {
         const accounts = this.props.accounts.map(item => {
+            item.displayMoney = `${item.money} ${item.currency}`;
             item.actions = (
                 <ActionsButtons 
-                    onEditClick={() => this.toggleModalWindow('editWindow', item.id)}
-                    onRemoveClick={() => this.toggleModalWindow('removeWindow', item.id)} />
+                    onEditClick={() => this.toggleModalWindow('editWindow', 'accountId', item.id)}
+                    onRemoveClick={() => this.toggleModalWindow('removeWindow', 'accountId', item.id)} />
             );
             return item;
         });
@@ -110,7 +119,7 @@ class Accounts extends Component {
                 <Button
                     positive
                     className='add-account-button'
-                    onClick={() => this.toggleModalWindow('addWindow', null)}>Add New Account</Button>
+                    onClick={() => this.toggleModalWindow('addWindow', 'accountId')}>Add New Account</Button>
                 <ReactTable
                     data={accounts}
                     columns={tableHeaders.ACCOUNTS}
@@ -123,7 +132,7 @@ class Accounts extends Component {
                     headerText='Add new account'
                     submitText='Add'
                     onSubmit={this.addAccount}
-                    onCancel={() => this.toggleModalWindow('addWindow', null)}
+                    onCancel={() => this.toggleModalWindow('addWindow', 'accountId')}
                 />
 
                 <AccountWindow 
@@ -131,13 +140,13 @@ class Accounts extends Component {
                     headerText='Edit account'
                     submitText='Edit'
                     onSubmit={this.editAccount}
-                    onCancel={() => this.toggleModalWindow('editWindow', null)}
+                    onCancel={() => this.toggleModalWindow('editWindow', 'accountId')}
                     values={getAccount(this.state.accountId)}
                 />
 
                 <Modal
                     open={this.state.removeWindow}
-                    onClose={() => this.toggleModalWindow('removeWindow', null)}
+                    onClose={() => this.toggleModalWindow('removeWindow', 'accountId')}
                     size='mini'
                     dimmer='inverted'>
                     <Modal.Header>Confirm account deletion</Modal.Header>
@@ -145,7 +154,7 @@ class Accounts extends Component {
                         <p>Are you sure you want to remove this account?</p>
                         <div style={{textAlign: 'center'}}>
                             <Button negative onClick={this.removeAccount}>Remove</Button>
-                            <Button onClick={() => this.toggleModalWindow('removeWindow', null)}>Cancel</Button>
+                            <Button onClick={() => this.toggleModalWindow('removeWindow', 'accountId')}>Cancel</Button>
                         </div>
                     </Modal.Content>
                 </Modal>

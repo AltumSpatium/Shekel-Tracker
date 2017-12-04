@@ -37,6 +37,7 @@ class Register extends Component {
                     title='Registration'
                     isLoading={this.props.isLoading}
                     onSubmit={this.onSubmit}
+                    submitText='Sign Up'
                 />
                 {error ? <p className='errorMsg'>{errorMessages.email}</p> : ''}
             </div>

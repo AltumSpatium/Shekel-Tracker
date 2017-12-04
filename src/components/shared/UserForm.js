@@ -65,7 +65,7 @@ class UserForm extends Component {
 
     render() {
         const { email, password, isAgree } = this.state;
-        const { isLoading, title } = this.props;
+        const { isLoading, title, submitText } = this.props;
 
         return (
             <Dimmer.Dimmable as={Segment} dimmed={isLoading} className='user-form'>
@@ -107,7 +107,7 @@ class UserForm extends Component {
                     }
                     <Button
                         fluid positive
-                        content='Submit'
+                        content={submitText}
                         disabled={title === 'Registration' ? !isAgree : false}
                         onClick={this.onSubmit}
                     />

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { Button, Input, Dropdown, Modal } from 'semantic-ui-react';
+import currencies from 'constants/currencies';
 
-// TODO: Improve validation, add currency support, fix 'uncontrolled component warning' with title input
+// TODO: Improve validation, fix 'uncontrolled component warning' with title input
 
 const errorMessages = {
     titleLength: 'Title must be at least 4 characters long!',
@@ -25,6 +26,8 @@ const accountTypes = [
     }
 ];
 
+const currencyOptions = currencies.map(item => ({key: item, value: item, text: item}));
+
 class AccountWindow extends Component {
     constructor(props) {
         super(props);
@@ -33,6 +36,7 @@ class AccountWindow extends Component {
             title: '',
             type: null,
             money: '',
+            currency: '',
 
             titleError: '',
             typeError: '',
@@ -74,29 +78,30 @@ class AccountWindow extends Component {
     }
 
     componentWillReceiveProps(newProps) {
-        const { values: { title, type, money }={} } = newProps;
-        this.setState({title, type, money});
+        const { values: { title, type, money, currency='USD' }={} } = newProps;
+        this.setState({title, type, money, currency});
     }
-
 
     render() {
         const { headerText, submitText, isOpen, onSubmit, onCancel } = this.props;
-        const { title, type, money } = this.state;
+        const { title, type, money, currency } = this.state;
 
         const onSubmitClick = () => {
             const { titleError, typeError, moneyError } = this.state;
-            const { title, type, money } = this.state;
+            const { title, type, money, currency } = this.state;
 
             this.checkValidity('title', title);
             this.checkValidity('type', type);
             this.checkValidity('money', money);
             if (title && type && money && !titleError && !typeError && !moneyError) {
-                onSubmit({title, type, money});
-                this.setState({title: '', type: '', money: '', titleError: '', typeError: '', moneyError: ''});
+                onSubmit({title, type, money, currency});
+                this.setState({title: '', type: '', money: '', currency: '',
+                    titleError: '', typeError: '', moneyError: ''});
             }
         };
         const onCancelClick = () => {
-            this.setState({title: '', type: '', money: '', titleError: '', typeError: '', moneyError: ''});
+            this.setState({title: '', type: '', money: '', currency: '',
+                titleError: '', typeError: '', moneyError: ''});
             onCancel();
         };
 
@@ -119,8 +124,13 @@ class AccountWindow extends Component {
                             onChange={this.onChange} error={!!this.state.typeError} />
                         {this.state.typeError ? <p className='errorMsg'>{this.state.typeError}</p> : ''}
                         <Input
-                            label='$' placeholder='Account money...' name='money' type='number'
-                            fluid value={money} onChange={this.onChange} error={!!this.state.moneyError} />
+                            labelPosition='right' placeholder='Account money...' name='money' type='number'
+                            fluid value={money} onChange={this.onChange} error={!!this.state.moneyError}
+                            label={
+                                <Dropdown 
+                                    options={currencyOptions} value={currency}
+                                    name='currency' onChange={this.onChange} />
+                            } />
                         {this.state.moneyError ? <p className='errorMsg'>{this.state.moneyError}</p> : ''}
                     </div>
                     <div style={{textAlign: 'center'}}>

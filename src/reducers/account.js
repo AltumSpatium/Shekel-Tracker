@@ -19,7 +19,6 @@ const auth = (state = initialState, action) => {
             accounts.push(action.payload);
             return { ...state, accounts };
         case UPDATE_ACCOUNT:
-            const accnts = state.accounts.slice();
             const updatedAccount = action.payload;
             return { ...state, accounts: state.accounts.map(
                 item => item.id === updatedAccount.id ? updatedAccount : item) };

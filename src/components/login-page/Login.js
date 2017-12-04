@@ -34,6 +34,7 @@ class Login extends Component {
                     title='Login'
                     isLoading={this.props.isLoading}
                     onSubmit={this.onSubmit}
+                    submitText='Sign In'
                 />
                 {error ? <p className='errorMsg'>{errorMessages.email}</p> : ''}
             </div>

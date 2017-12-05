@@ -10,7 +10,7 @@ import moment from 'moment';
 import 'react-datepicker/dist/react-datepicker.css';
 
 const errorMessages = {
-    nameLength: 'Name must be at least 3 characters long!',
+    nameLength: 'Name must be at least 4 characters long!',
     name: 'Name can only contain Latin characters and numbers!',
     newCategory: 'Category name can only contain Latin characters and numbers!',
     newCategoryLength: 'Category name must be at least 3 characters long!',
@@ -233,7 +233,9 @@ class RecordWindow extends Component {
                             placeholder='Select category' name='category'
                             selection options={categoriesOptions} value={category}
                             onChange={this.onChange} error={!!this.state.categoryError} />
-                        <Button icon='add' onClick={this.toggleAddCategoryWindow} className='btn-with-offset' />
+                        <Button 
+                            icon='add' onClick={() => this.toggleModalWindow('addCategoryOpen')}
+                            className='btn-with-offset' />
                         {this.state.categoryError ? <p className='errorMsg'>{this.state.categoryError}</p> : ''}
 
                         <div className={`ui input fluid ${this.state.dateError ? 'error' : ''}`}>

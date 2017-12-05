@@ -19,7 +19,7 @@ import {
 import 'react-table/react-table.css';
 import 'styles/Income.css';
 
-// TODO: Add currency convertion support, mb beutify table cells
+// TODO: Add currency convertion support, add processing of planned incomes
 
 const user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {}; // FIX DAT
 
@@ -69,6 +69,7 @@ class Income extends Component {
                 ...snapshot.val()
             };
             const oldIncome = this.props.incomes.filter(item => item.id === updatedIncome.id)[0];
+            if (!oldIncome) return;
 
             this.accountsRef.child(oldIncome.account).once('value', s => {
                 const account = s.val();

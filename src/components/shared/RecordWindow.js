@@ -140,6 +140,7 @@ class RecordWindow extends Component {
 
     onChangeDate(momentObj) {
         const date = momentObj.format('YYYY/MM/DD');
+        //const date = momentObj.toDate().toString();
         this.setState({date});
         this.checkValidity('date', date);
     }

@@ -73,11 +73,13 @@ class Income extends Component {
 
             this.accountsRef.child(oldIncome.account).once('value', s => {
                 const account = s.val();
-                account.money = +account.money -
-                    convertCurrency(oldIncome.currency, account.currency, +oldIncome.money) +
-                    convertCurrency(updatedIncome.currency, account.currency, +updatedIncome.money);
-                this.accountsRef.child(oldIncome.account).update(account);
-                this.props.updateIncome(updatedIncome);
+                if (account) {
+                    account.money = +account.money -
+                        convertCurrency(oldIncome.currency, account.currency, +oldIncome.money) +
+                        convertCurrency(updatedIncome.currency, account.currency, +updatedIncome.money);
+                    this.accountsRef.child(oldIncome.account).update(account);
+                    this.props.updateIncome(updatedIncome);
+                }
             });
         });
         this.incomeRef.on('child_removed', snapshot => {
@@ -85,9 +87,11 @@ class Income extends Component {
 
             this.accountsRef.child(removedIncome.account).once('value', s => {
                 const account = s.val();
-                account.money = +account.money -
-                    convertCurrency(removedIncome.currency, account.currency, +removedIncome.money);
-                this.accountsRef.child(removedIncome.account).update(account);
+                if (account) {
+                    account.money = +account.money -
+                        convertCurrency(removedIncome.currency, account.currency, +removedIncome.money);
+                    this.accountsRef.child(removedIncome.account).update(account);
+                }
                 this.props.removeIncome(snapshot.key);
             });
         });

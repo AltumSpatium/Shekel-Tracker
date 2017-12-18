@@ -61,6 +61,7 @@ class Accounts extends Component {
         });
         this.accountsRef.on('child_removed', snapshot => {
             this.removeRelatedRecords(snapshot.key, 'income');
+            this.removeRelatedRecords(snapshot.key, 'expenses');
             this.props.removeAccount(snapshot.key);
         });
         this.props.getAllAccounts()

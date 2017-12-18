@@ -84,9 +84,11 @@ class Expenses extends Component {
 
             this.accountsRef.child(removedExpense.account).once('value', s => {
                 const account = s.val();
-                account.money = +account.money +
-                    convertCurrency(removedExpense.currency, account.currency, +removedExpense.money);
-                this.accountsRef.child(removedExpense.account).update(account);
+                if (account) {
+                    account.money = +account.money +
+                        convertCurrency(removedExpense.currency, account.currency, +removedExpense.money);
+                    this.accountsRef.child(removedExpense.account).update(account);
+                }
                 this.props.removeExpense(snapshot.key);
             });
         });

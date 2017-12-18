@@ -7,7 +7,7 @@ class Reports extends Component {
 
     render() {
         return (
-            <div className="Reports">
+            <div className='Reports'>
                 Reports page
             </div>
         );

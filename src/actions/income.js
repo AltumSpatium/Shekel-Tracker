@@ -18,17 +18,17 @@ const removeIncomeSuccess = success(REMOVE_INCOME);
 
 export const getAllIncomes = () => dispatch => {
     const user = JSON.parse(localStorage['stUser']);
-    const incomeRef = firebaseApp.database().ref('income/' + user.uid);
+    const recordsRef = firebaseApp.database().ref('records/' + user.uid);
     
-    return incomeRef.once('value', snapshot => {
+    return recordsRef.once('value', snapshot => {
         const incomes = [];
         snapshot.forEach(childSnapshot => {
-            const income = {
+            const record = {
                 id: childSnapshot.key,
                 ...childSnapshot.val()
             };
-            if (new Date(income.date) <= moment().toDate())
-                incomes.push(income);
+            if (new Date(record.date) <= moment().toDate() && record.type === 'income')
+                incomes.push(record);
         });
         return dispatch(getAllIncomesSuccess(incomes));
     });

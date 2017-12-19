@@ -5,7 +5,6 @@ import { tableHeaders } from 'constants/default';
 import ActionsButtons from 'components/shared/ActionsButtons';
 import RecordWindow from 'components/shared/RecordWindow';
 import firebaseApp from 'utils/firebase';
-import convertCurrency from 'utils/convertCurrency';
 import toggleModalWindow from 'utils/toggleModalWindow';
 import { connect } from 'react-redux';
 import {
@@ -19,7 +18,7 @@ import {
 import 'react-table/react-table.css';
 import 'styles/Income.css';
 
-// TODO: Add currency convertion support, add processing of planned incomes
+// TODO: Add processing of planned incomes
 
 const user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {}; // FIX DAT
 
@@ -36,18 +35,17 @@ class Income extends Component {
             incomeId: null
         };
 
-        this.incomeRef = firebaseApp.database().ref('income/' + user.uid);
-        this.accountsRef = firebaseApp.database().ref('accounts/' + user.uid);
-
         this.toggleModalWindow = toggleModalWindow.bind(this);
         this.addIncome = this.addIncome.bind(this);
         this.editIncome = this.editIncome.bind(this);
         this.removeIncome = this.removeIncome.bind(this);
     }
 
-    componentWillMount() {
+    componentDidMount() {
+        this.recordsRef = firebaseApp.database().ref('records/' + user.uid);
+
         let newItems = false;
-        this.incomeRef.on('child_added', snapshot => {
+        this.recordsRef.on('child_added', snapshot => {
             if (!newItems) return;
 
             const newIncome = {
@@ -55,69 +53,43 @@ class Income extends Component {
                 ...snapshot.val()
             };
 
-            this.accountsRef.child(newIncome.account).once('value', s => {
-                const account = s.val();
-                account.money = +account.money + 
-                    convertCurrency(newIncome.currency, account.currency, +newIncome.money);
-                this.accountsRef.child(newIncome.account).update(account);
-                this.props.addIncome(newIncome);
-            });
+            this.props.addIncome(newIncome);
         });
-        this.incomeRef.on('child_changed', snapshot => {
+        this.recordsRef.on('child_changed', snapshot => {
             const updatedIncome = {
                 id: snapshot.key,
                 ...snapshot.val()
             };
-            const oldIncome = this.props.incomes.filter(item => item.id === updatedIncome.id)[0];
-            if (!oldIncome) return;
 
-            this.accountsRef.child(oldIncome.account).once('value', s => {
-                const account = s.val();
-                if (account) {
-                    account.money = +account.money -
-                        convertCurrency(oldIncome.currency, account.currency, +oldIncome.money) +
-                        convertCurrency(updatedIncome.currency, account.currency, +updatedIncome.money);
-                    this.accountsRef.child(oldIncome.account).update(account);
-                    this.props.updateIncome(updatedIncome);
-                }
-            });
+            this.props.updateIncome(updatedIncome);
         });
-        this.incomeRef.on('child_removed', snapshot => {
-            const removedIncome = snapshot.val();
-
-            this.accountsRef.child(removedIncome.account).once('value', s => {
-                const account = s.val();
-                if (account) {
-                    account.money = +account.money -
-                        convertCurrency(removedIncome.currency, account.currency, +removedIncome.money);
-                    this.accountsRef.child(removedIncome.account).update(account);
-                }
-                this.props.removeIncome(snapshot.key);
-            });
+        this.recordsRef.on('child_removed', snapshot => {
+            this.props.removeIncome(snapshot.key);
         });
         this.props.getAllIncomes()
             .then(() => { newItems = true });
     }
 
     componentWillUnmount() {
-        this.incomeRef.off();
+        this.recordsRef.off();
         this.props.clearIncomes();
     }
 
-    addIncome(newIncome) {
-        this.incomeRef.push(newIncome);
+    addIncome(newRecord) {
+        newRecord.type = 'income';
+        this.recordsRef.push(newRecord);
         this.toggleModalWindow('addWindow', 'incomeId');
     }
 
     editIncome(income) {
         const id = this.state.incomeId;
-        this.incomeRef.child(id).update(income);
+        this.recordsRef.child(id).update(income);
         this.toggleModalWindow('editWindow', 'incomeId');
     }
 
     removeIncome() {
         const id = this.state.incomeId;
-        this.incomeRef.child(id).remove();
+        this.recordsRef.child(id).remove();
         this.toggleModalWindow('removeWindow', 'incomeId');
     }
 

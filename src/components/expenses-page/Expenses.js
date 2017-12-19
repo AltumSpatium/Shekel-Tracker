@@ -5,7 +5,6 @@ import { tableHeaders } from 'constants/default';
 import ActionsButtons from 'components/shared/ActionsButtons';
 import RecordWindow from 'components/shared/RecordWindow';
 import firebaseApp from 'utils/firebase';
-import convertCurrency from 'utils/convertCurrency';
 import toggleModalWindow from 'utils/toggleModalWindow';
 import { connect } from 'react-redux';
 import {
@@ -18,7 +17,7 @@ import {
 
 import 'styles/Expenses.css';
 
-// TODO: Add currency convertion support, add processing of planned expenses
+// TODO: Add processing of planned expenses
 
 const user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {}; // FIX DAT
 
@@ -35,18 +34,17 @@ class Expenses extends Component {
             expenseId: null
         };
 
-        this.expensesRef = firebaseApp.database().ref('expenses/' + user.uid);
-        this.accountsRef = firebaseApp.database().ref('accounts/' + user.uid);
-
         this.toggleModalWindow = toggleModalWindow.bind(this);
         this.addExpense = this.addExpense.bind(this);
         this.editExpense = this.editExpense.bind(this);
         this.removeExpense = this.removeExpense.bind(this);
     }
 
-    componentWillMount() {
+    componentDidMount() {
+        this.recordsRef = firebaseApp.database().ref('records/' + user.uid);
+
         let newItems = false;
-        this.expensesRef.on('child_added', snapshot => {
+        this.recordsRef.on('child_added', snapshot => {
             if (!newItems) return;
 
             const newExpense = {
@@ -54,67 +52,43 @@ class Expenses extends Component {
                 ...snapshot.val()
             };
 
-            this.accountsRef.child(newExpense.account).once('value', s => {
-                const account = s.val();
-                account.money = +account.money - 
-                    convertCurrency(newExpense.currency, account.currency, +newExpense.money);
-                this.accountsRef.child(newExpense.account).update(account);
-                this.props.addExpense(newExpense);
-            });
+            this.props.addExpense(newExpense);
         });
-        this.expensesRef.on('child_changed', snapshot => {
+        this.recordsRef.on('child_changed', snapshot => {
             const updatedExpense = {
                 id: snapshot.key,
                 ...snapshot.val()
             };
-            const oldExpense = this.props.expenses.filter(item => item.id === updatedExpense.id)[0];
-            if (!oldExpense) return;
 
-            this.accountsRef.child(oldExpense.account).once('value', s => {
-                const account = s.val();
-                account.money = +account.money +
-                    convertCurrency(oldExpense.currency, account.currency, +oldExpense.money) -
-                    convertCurrency(updatedExpense.currency, account.currency, +updatedExpense.money);
-                this.accountsRef.child(oldExpense.account).update(account);
-                this.props.updateIncome(updatedExpense);
-            });
+            this.props.updateExpense(updatedExpense);
         });
-        this.expensesRef.on('child_removed', snapshot => {
-            const removedExpense = snapshot.val();
-
-            this.accountsRef.child(removedExpense.account).once('value', s => {
-                const account = s.val();
-                if (account) {
-                    account.money = +account.money +
-                        convertCurrency(removedExpense.currency, account.currency, +removedExpense.money);
-                    this.accountsRef.child(removedExpense.account).update(account);
-                }
-                this.props.removeExpense(snapshot.key);
-            });
+        this.recordsRef.on('child_removed', snapshot => {
+            this.props.removeExpense(snapshot.key);
         });
         this.props.getAllExpenses()
             .then(() => { newItems = true });
     }
 
     componentWillUnmount() {
-        this.expensesRef.off();
+        this.recordsRef.off();
         this.props.clearExpenses();
     }
 
-    addExpense(newExpense) {
-        this.expensesRef.push(newExpense);
+    addExpense(newRecord) {
+        newRecord.type = 'expense';
+        this.recordsRef.push(newRecord);
         this.toggleModalWindow('addWindow', 'expenseId');
     }
 
-    editExpense(income) {
+    editExpense(expense) {
         const id = this.state.expenseId;
-        this.expensesRef.child(id).update(income);
+        this.recordsRef.child(id).update(expense);
         this.toggleModalWindow('editWindow', 'expenseId');
     }
 
     removeExpense() {
         const id = this.state.expenseId;
-        this.expensesRef.child(id).remove();
+        this.recordsRef.child(id).remove();
         this.toggleModalWindow('removeWindow', 'expenseId');
     }
 

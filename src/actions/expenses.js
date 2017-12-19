@@ -18,17 +18,17 @@ const removeExpenseSuccess = success(REMOVE_EXPENSE);
 
 export const getAllExpenses = () => dispatch => {
     const user = JSON.parse(localStorage['stUser']);
-    const expensesRef = firebaseApp.database().ref('expenses/' + user.uid);
+    const recordsRef = firebaseApp.database().ref('records/' + user.uid);
     
-    return expensesRef.once('value', snapshot => {
+    return recordsRef.once('value', snapshot => {
         const expenses = [];
         snapshot.forEach(childSnapshot => {
-            const expense = {
+            const record = {
                 id: childSnapshot.key,
                 ...childSnapshot.val()
             };
-            if (new Date(expense.date) <= moment().toDate())
-                expenses.push(expense);
+            if (new Date(record.date) <= moment().toDate() && record.type === 'expense')
+                expenses.push(record);
         });
         return dispatch(getAllExpensesSuccess(expenses));
     });

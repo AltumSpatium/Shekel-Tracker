@@ -38,7 +38,6 @@ class Accounts extends Component {
         this.addAccount = this.addAccount.bind(this);
         this.editAccount = this.editAccount.bind(this);
         this.removeAccount = this.removeAccount.bind(this);
-        this.removeRelatedRecords = this.removeRelatedRecords.bind(this);
     }
 
     componentWillMount() {
@@ -60,22 +59,10 @@ class Accounts extends Component {
             this.props.updateAccount(updatedAccount);
         });
         this.accountsRef.on('child_removed', snapshot => {
-            this.removeRelatedRecords(snapshot.key, 'income');
-            this.removeRelatedRecords(snapshot.key, 'expenses');
             this.props.removeAccount(snapshot.key);
         });
         this.props.getAllAccounts()
             .then(() => { newItems = true });
-    }
-
-    removeRelatedRecords(accountId, recordName) {
-        const recordRef = firebaseApp.database().ref(recordName + '/' + user.uid);
-        recordRef.once('value', snapshot => {
-            snapshot.forEach(childSnapshot => {
-                if (childSnapshot.val().account === accountId)
-                    recordRef.child(childSnapshot.key).remove();
-            });
-        });
     }
 
     componentWillUnmount() {

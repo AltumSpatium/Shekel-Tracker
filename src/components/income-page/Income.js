@@ -77,6 +77,7 @@ class Income extends Component {
 
     addIncome(newRecord) {
         newRecord.type = 'income';
+        newRecord.planning = false;
         this.recordsRef.push(newRecord);
         this.toggleModalWindow('addWindow', 'incomeId');
     }
@@ -110,10 +111,12 @@ class Income extends Component {
         return (
             <div className='Income'>
                 <Header as='h1' textAlign='center'>Income</Header>
-                <Button
-                    positive
-                    className='add-record-button'
-                    onClick={() => this.toggleModalWindow('addWindow', 'incomeId')}>Add New Record</Button>
+                <div className='add-record-panel'>
+                    <Button
+                        positive
+                        className='add-record-button'
+                        onClick={() => this.toggleModalWindow('addWindow', 'incomeId')}>Add New Record</Button>
+                </div>
                 <ReactTable
                     data={incomes}
                     columns={tableHeaders.INCOME}

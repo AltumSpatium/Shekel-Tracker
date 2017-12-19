@@ -109,10 +109,12 @@ class Expenses extends Component {
         return (
             <div className='Expenses'>
                 <Header as='h1' textAlign='center'>Expenses</Header>
-                <Button
-                    positive
-                    className='add-record-button'
-                    onClick={() => this.toggleModalWindow('addWindow', 'expenseId')}>Add New Record</Button>
+                <div className='add-record-panel'>
+                    <Button
+                        negative
+                        className='add-record-button'
+                        onClick={() => this.toggleModalWindow('addWindow', 'expenseId')}>Add New Record</Button>
+                </div>
                 <ReactTable
                     data={expenses}
                     columns={tableHeaders.EXPENSES}

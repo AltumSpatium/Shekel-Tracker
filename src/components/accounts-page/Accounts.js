@@ -104,10 +104,12 @@ class Accounts extends Component {
         return (
             <div className='Accounts'>
                 <Header as='h1' textAlign='center'>Accounts</Header>
-                <Button
-                    positive
-                    className='add-account-button'
-                    onClick={() => this.toggleModalWindow('addWindow', 'accountId')}>Add New Account</Button>
+                <div className='add-record-panel'>
+                    <Button
+                        positive
+                        className='add-record-button'
+                        onClick={() => this.toggleModalWindow('addWindow', 'accountId')}>Add New Account</Button>
+                </div>
                 <ReactTable
                     data={accounts}
                     columns={tableHeaders.ACCOUNTS}

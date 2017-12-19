@@ -35,6 +35,7 @@ class RecordWindow extends Component {
 
             userAccounts: [],
             userCategories: [],
+            recordType: 'income',
 
             nameError: '',
             categoryError: '',
@@ -48,10 +49,7 @@ class RecordWindow extends Component {
             newCategoryError: ''
         };
 
-        const recordType = this.props.recordType;
-
         this.accountsRef = firebaseApp.database().ref('accounts/' + user.uid);
-        this.categoriesRef = firebaseApp.database().ref('categories').child(user.uid).child(recordType);
 
         this.onSubmitClick = this.onSubmitClick.bind(this);
         this.onCancelClick = this.onCancelClick.bind(this);
@@ -64,15 +62,7 @@ class RecordWindow extends Component {
         this.validate = this.validate.bind(this);
     }
 
-    componentWillMount() {
-        this.categoriesRef.once('value', snapshot => {
-            const categories = [];
-            snapshot.forEach(childSnapshot => {
-                const category = childSnapshot.val();
-                categories.push(category);
-            });
-            this.setState({userCategories: categories});
-        });
+    componentDidMount() {
         this.accountsRef.once('value', snapshot => {
             const accounts = [];
             snapshot.forEach(childSnapshot => {
@@ -84,10 +74,6 @@ class RecordWindow extends Component {
             });
             this.setState({userAccounts: accounts});
         });
-    }
-
-    componentWillUnmount() {
-        this.categoriesRef.off();
     }
 
     checkValidity(name, value) {
@@ -204,8 +190,19 @@ class RecordWindow extends Component {
     }
 
     componentWillReceiveProps(newProps) {
-        const { values: { name, category, date, money, currency='USD', account }={} } = newProps;
-        this.setState({name, category, date, money, currency, account });
+        const { values: { name, category, date, money, currency='USD', account }={}, recordType } = newProps;
+
+        this.categoriesRef = firebaseApp.database().ref('categories').child(user.uid).child(recordType);
+        this.categoriesRef.once('value', snapshot => {
+            const categories = [];
+            snapshot.forEach(childSnapshot => {
+                const category = childSnapshot.val();
+                categories.push(category);
+            });
+            this.setState({userCategories: categories});
+        });
+
+        this.setState({name, category, date, money, currency, account, recordType });
     }
 
     render() {

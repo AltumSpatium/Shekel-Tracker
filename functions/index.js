@@ -135,30 +135,43 @@ exports.updateRecordsOnAccountUpdate = functions.database.ref('accounts/{userId}
 exports.performPlanning = functions.https.onRequest((req, res) => {
     const recordsRef = db.ref('records');
     const accountsRef = db.ref('accounts');
-    const applyPlanning = recordSnapshot => {
-        const record = recordSnapshot.val();
-        if (moment(record.date) <= moment() && record.planning) {
-            accountsRef.child(userRecordsSnapshot.key).child(record.account).once('value', s => {
-                const account = s.val();
-                if (account) {
-                    const accountMoney = parseFloat(account.money);
-                    const recordMoney = convertCurrency(
-                        record.currency, account.currency, parseFloat(record.money));
-                    account.money = accountMoney + 
-                        (record.type === 'income' ? recordMoney : -recordMoney);
-
-                    accountsRef.child(userRecordsSnapshot.key).child(record.account).update(account);
-
-                    record.planning = false;
-                    recordsRef.child(userRecordsSnapshot.key).child(recordSnapshot.key).update(record);
-                }
-            });
-        }
-    };
 
     recordsRef.once('value', snapshot => {
-        snapshot.forEach(userRecordsSnapshot => 
-            userRecordsSnapshot.forEach(applyPlanning));
+        snapshot.forEach(userRecordsSnapshot => {
+            const accountsToUpdate = {};
+
+            userRecordsSnapshot.forEach(recordSnapshot => {
+                const record = recordSnapshot.val();
+                if (moment(record.date) <= moment() && record.planning) {
+                    accountsToUpdate[record.account] = accountsToUpdate[record.account] || [];
+                    accountsToUpdate[record.account].push({record, key: recordSnapshot.key});
+                }
+            });
+
+            for (let accountID in accountsToUpdate) {
+                accountsRef.child(userRecordsSnapshot.key).child(accountID).once('value', s => {
+                    const account = s.val();
+                    if (account) {
+                        const accountMoney = parseFloat(account.money);
+
+                        let moneyToUpdate = 0;
+                        for (let recordSnap of accountsToUpdate[accountID]) {
+                            const { record, key } = recordSnap;
+                            const recordMoney = convertCurrency(
+                                record.currency, account.currency, parseFloat(record.money));
+                            moneyToUpdate += (record.type === 'income' ? recordMoney : -recordMoney);
+
+                            record.planning = false;
+                            recordsRef.child(userRecordsSnapshot.key).child(key).update(record);
+                        }
+
+                        account.money = accountMoney + moneyToUpdate;
+                        accountsRef.child(userRecordsSnapshot.key).child(accountID).update(account);
+                    }
+                });
+            }
+        });
+
         res.end();
     });
 });

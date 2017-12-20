@@ -126,7 +126,6 @@ class RecordWindow extends Component {
 
     onChangeDate(momentObj) {
         const date = momentObj.format('YYYY/MM/DD');
-        //const date = momentObj.toDate().toString();
         this.setState({date});
         this.checkValidity('date', date);
     }
@@ -210,8 +209,9 @@ class RecordWindow extends Component {
         const { name, category, date, money, currency, account } = this.state;
         const categoriesOptions = this.state.userCategories.map(item => ({key: item, value: item, text: item}));
         const accountsOptions = this.state.userAccounts.map(item => ({key: item.id, value: item.id, text: item.title}));
-        const dateFilter = date => allowFutureDate ? date.toDate() > moment().toDate() :
-            date.toDate() <= moment().toDate();
+        const dateFilter = date => allowFutureDate ? date > moment() :
+            date <= moment();
+        const dateToOpen = allowFutureDate ? moment().add('days', 1) : moment();
 
         return (
             <Modal
@@ -239,7 +239,8 @@ class RecordWindow extends Component {
                         <div className={`ui input fluid ${this.state.dateError ? 'error' : ''}`}>
                             <DatePicker 
                                 placeholderText='Select record date...' name='date' onChange={this.onChangeDate}
-                                value={date} className='date-input' dateFormat='YYYY/MM/DD' filterDate={dateFilter} />
+                                value={date} className='date-input' dateFormat='YYYY/MM/DD' filterDate={dateFilter}
+                                openToDate={dateToOpen} />
                         </div>
                         {this.state.dateError ? <p className='errorMsg'>{this.state.dateError}</p> : ''}
 

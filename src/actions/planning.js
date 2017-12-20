@@ -27,7 +27,7 @@ export const getAllPlanning = () => dispatch => {
                 id: childSnapshot.key,
                 ...childSnapshot.val()
             };
-            if (new Date(record.date) > moment().toDate())
+            if (moment(record.date) > moment())
             planning.push(record);
         });
         return dispatch(getAllPlanningSuccess(planning));

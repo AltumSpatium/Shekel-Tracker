@@ -93,7 +93,7 @@ class Expenses extends Component {
 
     render() {
         const expenses = this.props.expenses.map(item => {
-            item.displayMoney = `${item.money} ${item.currency}`;
+            item.displayMoney = `${Number(item.money)} ${item.currency}`;
             item.actions = (
                 <ActionsButtons 
                     onEditClick={() => this.toggleModalWindow('editWindow', 'expenseId', item.id)}

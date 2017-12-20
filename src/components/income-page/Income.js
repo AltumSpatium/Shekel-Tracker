@@ -94,7 +94,7 @@ class Income extends Component {
 
     render() {
         const incomes = this.props.incomes.map(item => {
-            item.displayMoney = `${item.money} ${item.currency}`;
+            item.displayMoney = `${Number(item.money)} ${item.currency}`;
             item.actions = (
                 <ActionsButtons 
                     onEditClick={() => this.toggleModalWindow('editWindow', 'incomeId', item.id)}

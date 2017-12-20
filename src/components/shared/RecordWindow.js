@@ -253,7 +253,7 @@ class RecordWindow extends Component {
 
                         <Input
                             labelPosition='right' placeholder='Record money...' name='money' type='number'
-                            fluid value={money} onChange={this.onChange} error={!!this.state.moneyError}
+                            fluid value={Number(money)} onChange={this.onChange} error={!!this.state.moneyError}
                             label={
                                 <Dropdown 
                                     options={currencyOptions} value={currency}

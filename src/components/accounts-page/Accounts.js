@@ -88,7 +88,7 @@ class Accounts extends Component {
 
     render() {
         const accounts = this.props.accounts.map(item => {
-            item.displayMoney = `${item.money} ${item.currency}`;
+            item.displayMoney = `${Number(item.money)} ${item.currency}`;
             item.actions = (
                 <ActionsButtons 
                     onEditClick={() => this.toggleModalWindow('editWindow', 'accountId', item.id)}

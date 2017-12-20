@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Checkbox, Button, Loader, Dimmer, Segment, Header } from 'semantic-ui-react';
+import { Form, Button, Loader, Dimmer, Segment, Header } from 'semantic-ui-react';
 
 // TODO: Improve validation
 

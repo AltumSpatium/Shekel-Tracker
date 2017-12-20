@@ -1,12 +1,21 @@
 const functions = require('firebase-functions');
+const money = require('./money');
 const moment = require('moment');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
+money.base = 'USD';
+money.rates = {
+    'BYN': 2.009216,
+    'RUB': 58.67696,
+    'EUR': 0.841525,
+    'USD': 1
+};
+
 const db = admin.database();
-const convertCurrency = (fromCurr, toCurr, money) => {
-    if (fromCurr === toCurr) return money;
-    return 0;
+const convertCurrency = (fromCurr, toCurr, amount) => {
+    if (fromCurr === toCurr) return amount;
+    return money(amount).from(fromCurr).to(toCurr).toFixed(2);
 };
 
 exports.updateAccountOnRecordAddition = functions.database.ref('records/{userId}/{recordId}')

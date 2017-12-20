@@ -27,7 +27,7 @@ export const getAllExpenses = () => dispatch => {
                 id: childSnapshot.key,
                 ...childSnapshot.val()
             };
-            if (new Date(record.date) <= moment().toDate() && record.type === 'expense')
+            if (moment(record.date) <= moment() && record.type === 'expense')
                 expenses.push(record);
         });
         return dispatch(getAllExpensesSuccess(expenses));

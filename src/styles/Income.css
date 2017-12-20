@@ -1,7 +1,11 @@
 .add-record-button {
-    margin: 0 2px 0 2px !important;
-    float: right;
+    margin: 0 2px 2px 2px !important;
     right: 0;
+    width: 120px;
+}
+
+.add-record-panel {
+    float: right;
 }
 
 .record-mw-fields > * {

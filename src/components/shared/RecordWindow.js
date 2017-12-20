@@ -18,7 +18,6 @@ const errorMessages = {
     empty: 'This field must be filled!'
 };
 
-const user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {}; // FIX DAT
 const currencyOptions = currencies.map(item => ({key: item, value: item, text: item}));
 
 class RecordWindow extends Component {
@@ -35,6 +34,7 @@ class RecordWindow extends Component {
 
             userAccounts: [],
             userCategories: [],
+            recordType: 'income',
 
             nameError: '',
             categoryError: '',
@@ -48,10 +48,8 @@ class RecordWindow extends Component {
             newCategoryError: ''
         };
 
-        const recordType = this.props.recordType;
-
-        this.accountsRef = firebaseApp.database().ref('accounts/' + user.uid);
-        this.categoriesRef = firebaseApp.database().ref('categories').child(user.uid).child(recordType);
+        this.user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {};
+        this.accountsRef = firebaseApp.database().ref('accounts/' + this.user.uid);
 
         this.onSubmitClick = this.onSubmitClick.bind(this);
         this.onCancelClick = this.onCancelClick.bind(this);
@@ -64,15 +62,7 @@ class RecordWindow extends Component {
         this.validate = this.validate.bind(this);
     }
 
-    componentWillMount() {
-        this.categoriesRef.once('value', snapshot => {
-            const categories = [];
-            snapshot.forEach(childSnapshot => {
-                const category = childSnapshot.val();
-                categories.push(category);
-            });
-            this.setState({userCategories: categories});
-        });
+    componentDidMount() {
         this.accountsRef.once('value', snapshot => {
             const accounts = [];
             snapshot.forEach(childSnapshot => {
@@ -84,10 +74,6 @@ class RecordWindow extends Component {
             });
             this.setState({userAccounts: accounts});
         });
-    }
-
-    componentWillUnmount() {
-        this.categoriesRef.off();
     }
 
     checkValidity(name, value) {
@@ -140,7 +126,6 @@ class RecordWindow extends Component {
 
     onChangeDate(momentObj) {
         const date = momentObj.format('YYYY/MM/DD');
-        //const date = momentObj.toDate().toString();
         this.setState({date});
         this.checkValidity('date', date);
     }
@@ -204,8 +189,19 @@ class RecordWindow extends Component {
     }
 
     componentWillReceiveProps(newProps) {
-        const { values: { name, category, date, money, currency='USD', account }={} } = newProps;
-        this.setState({name, category, date, money, currency, account });
+        const { values: { name, category, date, money, currency='USD', account }={}, recordType } = newProps;
+        this.setState({name, category, date, money, currency, account, recordType });
+
+        //if (!user.uid) return;
+        this.categoriesRef = firebaseApp.database().ref('categories').child(this.user.uid).child(recordType);
+        this.categoriesRef.once('value', snapshot => {
+            const categories = [];
+            snapshot.forEach(childSnapshot => {
+                const category = childSnapshot.val();
+                categories.push(category);
+            });
+            this.setState({userCategories: categories});
+        });
     }
 
     render() {
@@ -213,8 +209,9 @@ class RecordWindow extends Component {
         const { name, category, date, money, currency, account } = this.state;
         const categoriesOptions = this.state.userCategories.map(item => ({key: item, value: item, text: item}));
         const accountsOptions = this.state.userAccounts.map(item => ({key: item.id, value: item.id, text: item.title}));
-        const dateFilter = date => allowFutureDate ? date.toDate() > moment().toDate() :
-            date.toDate() <= moment().toDate();
+        const dateFilter = date => allowFutureDate ? date > moment() :
+            date <= moment();
+        const dateToOpen = allowFutureDate ? moment().add('days', 1) : moment();
 
         return (
             <Modal
@@ -242,7 +239,8 @@ class RecordWindow extends Component {
                         <div className={`ui input fluid ${this.state.dateError ? 'error' : ''}`}>
                             <DatePicker 
                                 placeholderText='Select record date...' name='date' onChange={this.onChangeDate}
-                                value={date} className='date-input' dateFormat='YYYY/MM/DD' filterDate={dateFilter} />
+                                value={date} className='date-input' dateFormat='YYYY/MM/DD' filterDate={dateFilter}
+                                openToDate={dateToOpen} />
                         </div>
                         {this.state.dateError ? <p className='errorMsg'>{this.state.dateError}</p> : ''}
 

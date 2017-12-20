@@ -17,10 +17,6 @@ import {
 
 import 'styles/Expenses.css';
 
-// TODO: Add processing of planned expenses
-
-const user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {}; // FIX DAT
-
 class Expenses extends Component {
     static path = '/expenses';
 
@@ -34,6 +30,8 @@ class Expenses extends Component {
             expenseId: null
         };
 
+        this.user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {};
+
         this.toggleModalWindow = toggleModalWindow.bind(this);
         this.addExpense = this.addExpense.bind(this);
         this.editExpense = this.editExpense.bind(this);
@@ -41,7 +39,7 @@ class Expenses extends Component {
     }
 
     componentDidMount() {
-        this.recordsRef = firebaseApp.database().ref('records/' + user.uid);
+        this.recordsRef = firebaseApp.database().ref('records/' + this.user.uid);
 
         let newItems = false;
         this.recordsRef.on('child_added', snapshot => {
@@ -76,6 +74,7 @@ class Expenses extends Component {
 
     addExpense(newRecord) {
         newRecord.type = 'expense';
+        newRecord.planning = false;
         this.recordsRef.push(newRecord);
         this.toggleModalWindow('addWindow', 'expenseId');
     }
@@ -109,10 +108,12 @@ class Expenses extends Component {
         return (
             <div className='Expenses'>
                 <Header as='h1' textAlign='center'>Expenses</Header>
-                <Button
-                    positive
-                    className='add-record-button'
-                    onClick={() => this.toggleModalWindow('addWindow', 'expenseId')}>Add New Record</Button>
+                <div className='add-record-panel'>
+                    <Button
+                        negative
+                        className='add-record-button'
+                        onClick={() => this.toggleModalWindow('addWindow', 'expenseId')}>Add New Record</Button>
+                </div>
                 <ReactTable
                     data={expenses}
                     columns={tableHeaders.EXPENSES}

@@ -18,7 +18,6 @@ const errorMessages = {
     empty: 'This field must be filled!'
 };
 
-const user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {}; // FIX DAT
 const currencyOptions = currencies.map(item => ({key: item, value: item, text: item}));
 
 class RecordWindow extends Component {
@@ -49,7 +48,8 @@ class RecordWindow extends Component {
             newCategoryError: ''
         };
 
-        this.accountsRef = firebaseApp.database().ref('accounts/' + user.uid);
+        this.user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {};
+        this.accountsRef = firebaseApp.database().ref('accounts/' + this.user.uid);
 
         this.onSubmitClick = this.onSubmitClick.bind(this);
         this.onCancelClick = this.onCancelClick.bind(this);
@@ -190,8 +190,10 @@ class RecordWindow extends Component {
 
     componentWillReceiveProps(newProps) {
         const { values: { name, category, date, money, currency='USD', account }={}, recordType } = newProps;
+        this.setState({name, category, date, money, currency, account, recordType });
 
-        this.categoriesRef = firebaseApp.database().ref('categories').child(user.uid).child(recordType);
+        //if (!user.uid) return;
+        this.categoriesRef = firebaseApp.database().ref('categories').child(this.user.uid).child(recordType);
         this.categoriesRef.once('value', snapshot => {
             const categories = [];
             snapshot.forEach(childSnapshot => {
@@ -200,8 +202,6 @@ class RecordWindow extends Component {
             });
             this.setState({userCategories: categories});
         });
-
-        this.setState({name, category, date, money, currency, account, recordType });
     }
 
     render() {

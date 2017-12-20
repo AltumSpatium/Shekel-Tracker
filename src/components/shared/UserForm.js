@@ -16,7 +16,6 @@ class UserForm extends Component {
         this.state = {
             email: '',
             password: '',
-            isAgree: false,
             emailError: '',
             passwordError: ''
         };
@@ -61,10 +60,8 @@ class UserForm extends Component {
         this.checkValidity(name, value);
     }
 
-    isAgreeHandler = () => this.setState({ isAgree: !this.state.isAgree });
-
     render() {
-        const { email, password, isAgree } = this.state;
+        const { email, password } = this.state;
         const { isLoading, title, submitText } = this.props;
 
         return (
@@ -94,21 +91,9 @@ class UserForm extends Component {
                         error={!!this.state.passwordError}
                     />
                     {this.state.passwordError ? <p className='errorMsg'>{this.state.passwordError}</p> : ''}
-                    {
-                        title === 'Registration' ? (
-                            <Form.Field>
-                                <Checkbox
-                                    checked={isAgree}
-                                    onChange={this.isAgreeHandler}
-                                    label='I agree to the Terms and Conditions'
-                                />
-                            </Form.Field>
-                        ) : ('')
-                    }
                     <Button
                         fluid positive
                         content={submitText}
-                        disabled={title === 'Registration' ? !isAgree : false}
                         onClick={this.onSubmit}
                     />
                 </Form>

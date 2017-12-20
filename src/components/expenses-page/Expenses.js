@@ -17,10 +17,6 @@ import {
 
 import 'styles/Expenses.css';
 
-// TODO: Add processing of planned expenses
-
-const user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {}; // FIX DAT
-
 class Expenses extends Component {
     static path = '/expenses';
 
@@ -34,6 +30,8 @@ class Expenses extends Component {
             expenseId: null
         };
 
+        this.user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {};
+
         this.toggleModalWindow = toggleModalWindow.bind(this);
         this.addExpense = this.addExpense.bind(this);
         this.editExpense = this.editExpense.bind(this);
@@ -41,7 +39,7 @@ class Expenses extends Component {
     }
 
     componentDidMount() {
-        this.recordsRef = firebaseApp.database().ref('records/' + user.uid);
+        this.recordsRef = firebaseApp.database().ref('records/' + this.user.uid);
 
         let newItems = false;
         this.recordsRef.on('child_added', snapshot => {

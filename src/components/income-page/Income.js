@@ -18,10 +18,6 @@ import {
 import 'react-table/react-table.css';
 import 'styles/Income.css';
 
-// TODO: Add processing of planned incomes
-
-const user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {}; // FIX DAT
-
 class Income extends Component {
     static path = '/income';
 
@@ -35,6 +31,8 @@ class Income extends Component {
             incomeId: null
         };
 
+        this.user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {};
+
         this.toggleModalWindow = toggleModalWindow.bind(this);
         this.addIncome = this.addIncome.bind(this);
         this.editIncome = this.editIncome.bind(this);
@@ -42,7 +40,7 @@ class Income extends Component {
     }
 
     componentDidMount() {
-        this.recordsRef = firebaseApp.database().ref('records/' + user.uid);
+        this.recordsRef = firebaseApp.database().ref('records/' + this.user.uid);
 
         let newItems = false;
         this.recordsRef.on('child_added', snapshot => {

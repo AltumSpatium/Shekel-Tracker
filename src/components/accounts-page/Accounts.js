@@ -17,8 +17,6 @@ import {
 
 import 'styles/Accounts.css';
 
-const user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {}; // FIX DAT
-
 class Accounts extends Component {
     static path = '/accounts';
 
@@ -32,7 +30,8 @@ class Accounts extends Component {
             accountId: null
         };
 
-        this.accountsRef = firebaseApp.database().ref('accounts/' + user.uid);
+        this.user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {};
+        this.accountsRef = firebaseApp.database().ref('accounts/' + this.user.uid);
 
         this.toggleModalWindow = toggleModalWindow.bind(this);
         this.addAccount = this.addAccount.bind(this);

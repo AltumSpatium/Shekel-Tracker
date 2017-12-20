@@ -17,8 +17,6 @@ import {
 
 import 'styles/Planning.css';
 
-const user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {}; // FIX DAT
-
 class Planning extends Component {
     static path = '/planning';
 
@@ -35,7 +33,8 @@ class Planning extends Component {
             recordType: 'income'
         };
 
-        this.recordsRef = firebaseApp.database().ref('records/' + user.uid);
+        this.user = localStorage['stUser'] ? JSON.parse(localStorage['stUser']) : {};
+        this.recordsRef = firebaseApp.database().ref('records/' + this.user.uid);
 
         this.toggleModalWindow = toggleModalWindow.bind(this);
         this.addIncome = this.addIncome.bind(this);
@@ -45,7 +44,7 @@ class Planning extends Component {
     }
 
     componentDidMount() {
-        this.recordsRef = firebaseApp.database().ref('records/' + user.uid);
+        this.recordsRef = firebaseApp.database().ref('records/' + this.user.uid);
 
         let newItems = false;
         this.recordsRef.on('child_added', snapshot => {

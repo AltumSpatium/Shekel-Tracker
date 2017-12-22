@@ -1,5 +1,19 @@
+.Reports {
+    width: 90%;
+    margin: 0 auto !important;
+}
+
 .reports-chart {
     width: 80%;
     margin: 0 auto;
     max-width: 1300px;
+}
+
+.datepicker-wrapper {
+    display: flex;
+}
+
+.centered {
+    display: block !important;
+    margin: 0 auto !important;
 }

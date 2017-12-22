@@ -5,8 +5,8 @@ const chart = {
     ],
     PERIODS: [
         'All time',
-        'Last month',
-        'Last week',
+        'This month',
+        'This week',
         'Date range'
     ],
     DATE_RANGE_PERIOD: 'Date range',

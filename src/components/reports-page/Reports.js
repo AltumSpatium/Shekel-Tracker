@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
-import { Header, Dropdown } from 'semantic-ui-react';
+import { Header, Segment, Dropdown, Form, Button } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import DatePicker from 'react-datepicker';
-import { getAllIncomes } from 'actions/income';
-import { getAllExpenses } from 'actions/expenses';
+import ChartsPanel from './ChartsPanel';
 import chartConstants from 'constants/reports';
-import createChart from 'utils/chart';
+import { getAllAccounts } from 'actions/account';
 
 import 'styles/Reports.css';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -18,44 +17,54 @@ class Reports extends Component {
 
         this.state = {
             from: null,
+            accounts: [],
             period: null,
             startDate: null,
             endDate: null,
+            canBeReported: false,
         };
 
         this.onChange = this.onChange.bind(this);
         this.getOptions = this.getOptions.bind(this);
-        this.createChart = this.createChart.bind(this);
         this.onChangeDate = this.onChangeDate.bind(this);
-    }
-
-    componentDidMount() {
-        this.props.getAllIncomes();
-        this.props.getAllExpenses();
+        this.checkAbilityToReport = this.checkAbilityToReport.bind(this);
     }
 
     onChange(event, data) {
-        this.setState({ [data.name]: data.value }, () => this.createChart());
+        this.setState({ [data.name]: data.value }, this.checkAbilityToReport);
     }
 
     onChangeDate(date, name) {
-        this.setState({ [name]: date }, () => this.createChart());
+        this.setState({ [name]: date }, this.checkAbilityToReport);
     }
 
     getOptions(array) {
         return array.map(f => ({ key: f, value: f, text: f }));
     }
 
-    createChart() {
-        const data = this.props[this.state.from];
-        createChart({ ...this.state, data });
+    get Accounts() {
+        return {
+            ids: this.props.Accounts.map(acc => acc.id),
+            options: this.props.Accounts.map((acc, i) => ({ key: i, value: acc.id, text: acc.title })),
+        }
+    }
+
+    checkAbilityToReport() {
+        const { from, accounts, period, startDate, endDate } = this.state;
+        if (!from
+            || !accounts.length
+            || (from === 'Incomes' && !period)
+            || ((period === 'Date range') && (!startDate || !endDate))) {
+            return this.setState({ canBeReported: false });
+        }
+        return this.setState({ canBeReported: true });
     }
 
     render() {
-        const { from, period, startDate, endDate } = this.state;
+        const { from, accounts, period, startDate, endDate, canBeReported } = this.state;
 
         const daterange = period === chartConstants.DATE_RANGE_PERIOD ? (
-            <div>
+            <Form.Field className='datepicker-wrapper'>
                 <DatePicker
                     placeholderText='Select start date' className='date-input' dateFormat='YYYY/MM/DD'
                     onChange={(m) => this.onChangeDate(m, 'startDate')}
@@ -66,41 +75,53 @@ class Reports extends Component {
                     onChange={(m) => this.onChangeDate(m, 'endDate')}
                     selectsEnd selected={endDate} startDate={startDate} endDate={endDate}
                 />
-            </div>
+            </Form.Field>
         ) : null;
 
         return (
-            <div className='Reports'>
+            <Segment className='Reports'>
                 <Header as='h1' textAlign='center'>Reports</Header>
 
-                <div className='reports-filters'>
-                    <Dropdown
-                        placeholder='Select source' name='from' selection
-                        options={this.getOptions(chartConstants.FROM)}
-                        value={from} onChange={this.onChange}
-                    />
-                    <Dropdown
-                        placeholder='Select period' name='period' selection
-                        options={this.getOptions(chartConstants.PERIODS)}
-                        value={period} onChange={this.onChange}
-                    />
-                    {daterange}
-                </div>
-
-                <div id='chart' className='chart-wrapper' />
-            </div>
+                <Form>
+                    <Form.Group widths='equal'>
+                        <Form.Field>
+                            <Dropdown
+                                placeholder='Select source' selection name='from'
+                                options={this.getOptions(chartConstants.FROM)}
+                                value={from} onChange={this.onChange}
+                            />
+                        </Form.Field>
+                        <Form.Field>
+                            <Dropdown
+                                placeholder='Select accounts' selection multiple name='accounts'
+                                options={this.Accounts.options}
+                                value={accounts} onChange={this.onChange}
+                            />
+                        </Form.Field>
+                    </Form.Group>
+                    <Form.Group widths='equal'>
+                        <Form.Field>
+                            <Dropdown
+                                placeholder='Select period' selection name='period'
+                                options={this.getOptions(chartConstants.PERIODS)}
+                                value={period} onChange={this.onChange}
+                            />
+                        </Form.Field>
+                        {daterange}
+                    </Form.Group>
+                </Form>
+                <ChartsPanel canBeReported={canBeReported} />
+            </Segment>
         );
     }
 }
 
 const mapStateToProps = state => ({
-    Incomes: state.income.incomes,
-    Expenses: state.expenses.expenses,
+    Accounts: state.account.accounts
 });
 
 const mapDispatchToProps = dispatch => ({
-    getAllIncomes: () => dispatch(getAllIncomes()),
-    getAllExpenses: () => dispatch(getAllExpenses()),
+    getAllAccounts: () => dispatch(getAllAccounts()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Reports);

@@ -1,4 +1,5 @@
 import Chart from 'chart.js';
+import moment from 'moment';
 
 Chart.pluginService.register({
     beforeDraw: function (chart) {
@@ -27,88 +28,147 @@ Chart.pluginService.register({
     }
 });
 
-function createChart(state) {
-    const { from, period, data } = state;
-    if (!from || !period) {
+const COLORS = [
+    'rgba(255, 99, 132, 0.5)',
+    'rgba(54, 162, 235, 0.5)',
+    'rgba(255, 206, 86, 0.5)',
+    'rgba(75, 192, 192, 0.5)',
+    'rgba(153, 102, 255, 0.5)',
+    'rgba(255, 159, 64, 0.5)',
+];
+
+function createChart(args) {
+    const {
+        from, period, accounts, startDate, endDate,
+        data, accountNames,
+    } = args;
+    let chartData = data.slice();
+    if (!from || !period || !accounts.length) {
         return;
     }
 
     document.getElementById('chart').innerHTML = '';
     document.getElementById('chart').innerHTML = '<canvas id="canvas"></canvas>';
 
-    const ctx = document.getElementById('canvas').getContext('2d');
+    const chartCanvas = document.getElementById('canvas').getContext('2d');
+
+    const todayDate = moment();
+
+    chartData = chartData.filter(record => accounts.includes(record.account));
+
+    switch (period) {
+        case 'This month': {
+            const startDay = todayDate.startOf('month').format('YYYY/MM/DD');
+            const endDay = todayDate.endOf('month').format('YYYY/MM/DD');
+            chartData = chartData.filter(record => record.date >= startDay && record.date <= endDay);
+            break;
+        }
+        case 'This week': {
+            const startDay = todayDate.startOf('week').format('YYYY/MM/DD');
+            const endDay = todayDate.endOf('week').format('YYYY/MM/DD');
+            chartData = chartData.filter(record => record.date >= startDay && record.date <= endDay);
+            break;
+        }
+        case 'Date range': {
+            chartData = chartData.filter(record => record.date >= startDate && record.date <= endDate);
+            break;
+        }
+        case 'All time':
+        default: {
+            break;
+        }
+    }
+
+    if (!chartData.length) {
+        return;
+    }
 
     switch (from) {
         case 'Incomes': {
-            const money = data.map(record => record.money);
-            const dates = data.map(record => record.date);
+            const dates = chartData.map(record => record.date.slice(0, 7))
+                .filter((item, index, arr) => arr.indexOf(item) === index)
+                .sort();
 
-            new Chart(ctx, {
+
+            const incomes = {};
+            chartData.forEach(record => {
+                const acc = record.account;
+                const dateIndex = dates.indexOf(record.date.slice(0, 7));
+                if (!incomes[acc]) {
+                    incomes[acc] = [];
+                }
+                const newValue = (incomes[acc][dateIndex] || 0) + +record.money;
+                incomes[acc][dateIndex] = newValue;
+            });
+            const accounts = Object.keys(incomes);
+
+            const chart = new Chart(chartCanvas, {
                 type: 'bar',
                 data: {
                     labels: dates,
-                    datasets: [{
-                        label: 'name',
-                        data: money,
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
+                    datasets: accounts.map((acc, i) => ({
+                        label: accountNames.find(account => account.id === acc).title,
+                        data: incomes[acc],
+                        backgroundColor: COLORS[i],
                         borderWidth: 1,
-                    }]
+                    }))
                 },
                 options: {
                     scales: {
-                        xAxes: [{
-                            categoryPercentage: 1.0,
-                            barPercentage: 1.0,
-                        }],
                         yAxes: [{
+                            stacked: true,
                             ticks: {
-                                max: Math.max.apply(null, money) * 1.5,
-                                beginAtZero: true,
-                            },
+                                beginAtZero: true
+                            }
+                        }],
+                        xAxes: [{
+                            stacked: true,
+                            ticks: {
+                                beginAtZero: true
+                            }
                         }]
-                    }
+
+                    },
                 }
             });
+            document.getElementById('canvas').onclick = function (evt) {
+                var activePoints = chart.getElementsAtEvent(evt);
+                console.log(activePoints, activePoints[0], activePoints[1])
+                if (activePoints.length > 0) {
+                    console.log(activePoints[0]._view.datasetLabel)
+                }
+            }
             break;
         }
 
         case 'Expenses': {
             const expenses = {};
-            data.forEach(record => {
+            chartData.forEach(record => {
                 const newValue = (expenses[record.category] || 0) + +record.money;
                 expenses[record.category] = newValue;
             });
 
-            new Chart(ctx, {
+            const chart = new Chart(chartCanvas, {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(expenses),
                     datasets: [{
                         data: Object.values(expenses).map(val => val.toFixed(2)),
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.5)',
-                            'rgba(54, 162, 235, 0.5)',
-                            'rgba(255, 206, 86, 0.5)',
-                            'rgba(75, 192, 192, 0.5)',
-                            'rgba(153, 102, 255, 0.5)',
-                            'rgba(255, 159, 64, 0.5)',
-                        ],
+                        backgroundColor: COLORS,
                     }]
                 },
                 options: {
-                    scales: {
-                        xAxes: [{
-                            gridLines: { display: false },
-                            ticks: { display: false },
-                        }],
-                        yAxes: [{
-                            gridLines: { display: false },
-                            ticks: { display: false },
-                        }]
-                    },
                     center: {
                         text: Object.values(expenses).reduce((acc, i) => acc + i, 0).toFixed(2) + ' USD'
+                    },
+                    onClick: function (evt, elements) {
+                        document.getElementById('canvas').onclick = function (evt) {
+                            var activePoints = chart.getElementsAtEvent(evt);
+                            if (activePoints.length) {
+                                const categoryName = chart.data.labels[activePoints[0]._index];
+                                console.log('categoryName', categoryName);
+                            }
+                        }
                     }
                 }
             });

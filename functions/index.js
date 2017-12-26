@@ -190,11 +190,12 @@ exports.addDefaultCategories = functions.auth.user().onCreate(event => {
     const categoriesRef = db.ref('categories').child(user.uid);
     const defaultCategories = {
         'income': [
-            'Other', 'Gifts', 'Salary', 'Transfers', 'Winnings'
+            'Salary', 'Deposit', 'Gifts', 'Winnings', 'Transfers', 'Other'
         ],
         'expenses': [
-            'Other', 'Friends', 'Family', 'Public service', 'Food', 'Restaurant',
-            'Education', 'Taxes', 'Medicine', 'Clothes', 'Transport', 'Sport'
+            'Shopping', 'Coffee', 'Dinner', 'Travel', 'Friends', 'Family',
+            'Public service', 'Food', 'Education', 'Taxes', 'Sport',
+            'Medicine', 'Clothes', 'Transport', 'Other'
         ]
     };
 

@@ -75,7 +75,7 @@ class Income extends Component {
 
     addIncome(newRecord) {
         newRecord.type = 'income';
-        newRecord.planning = false;
+        newRecord.planning = 'false';
         this.recordsRef.push(newRecord);
         this.toggleModalWindow('addWindow', 'incomeId');
     }

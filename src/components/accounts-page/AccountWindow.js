@@ -125,7 +125,7 @@ class AccountWindow extends Component {
                         {this.state.typeError ? <p className='errorMsg'>{this.state.typeError}</p> : ''}
                         <Input
                             labelPosition='right' placeholder='Account money...' name='money' type='number'
-                            fluid value={Number(money)} onChange={this.onChange} error={!!this.state.moneyError}
+                            fluid value={money} onChange={this.onChange} error={!!this.state.moneyError}
                             label={
                                 <Dropdown 
                                     options={currencyOptions} value={currency}

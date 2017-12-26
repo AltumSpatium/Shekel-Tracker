@@ -79,14 +79,14 @@ class Planning extends Component {
 
     addIncome(newRecord) {
         newRecord.type = 'income';
-        newRecord.planning = true;
+        newRecord.planning = 'true';
         this.recordsRef.push(newRecord);
         this.toggleModalWindow('addIncomeWindow', 'planningId');
     }
 
     addExpense(newRecord) {
         newRecord.type = 'expense';
-        newRecord.planning = true;
+        newRecord.planning = 'true';
         this.recordsRef.push(newRecord);
         this.toggleModalWindow('addExpenseWindow', 'planningId');
     }

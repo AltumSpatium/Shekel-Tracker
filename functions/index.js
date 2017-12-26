@@ -15,13 +15,13 @@ money.rates = {
 const db = admin.database();
 const convertCurrency = (fromCurr, toCurr, amount) => {
     if (fromCurr === toCurr) return amount;
-    return money(amount).from(fromCurr).to(toCurr).toFixed(2);
+    return +money(amount).from(fromCurr).to(toCurr).toFixed(2);
 };
 
 exports.updateAccountOnRecordAddition = functions.database.ref('records/{userId}/{recordId}')
     .onCreate(event => {
         const newRecord = event.data.val();
-        if (newRecord.planning) return;
+        if (newRecord.planning === 'true') return;
 
         const { userId } = event.params;
         const accountRef = db.ref(`accounts/${userId}`).child(newRecord.account);
@@ -32,8 +32,8 @@ exports.updateAccountOnRecordAddition = functions.database.ref('records/{userId}
                 const accountMoney = parseFloat(account.money);
                 const recordMoney = convertCurrency(
                     newRecord.currency, account.currency, parseFloat(newRecord.money));
-                account.money = accountMoney + 
-                    (newRecord.type === 'income' ? recordMoney : -recordMoney);
+                account.money = +accountMoney + 
+                    (newRecord.type === 'income' ? +recordMoney : -recordMoney);
                 accountRef.update(account);
             }
         });
@@ -42,7 +42,7 @@ exports.updateAccountOnRecordAddition = functions.database.ref('records/{userId}
 exports.updateAccountOnRecordDeletion = functions.database.ref('records/{userId}/{recordId}')
     .onDelete(event => {
         const deletedRecord = event.data.previous.val();
-        if (deletedRecord.planning) return;
+        if (deletedRecord.planning === 'true') return;
 
         const { userId } = event.params;
         const accountRef = db.ref(`accounts/${userId}`).child(deletedRecord.account);
@@ -53,8 +53,8 @@ exports.updateAccountOnRecordDeletion = functions.database.ref('records/{userId}
                 const accountMoney = parseFloat(account.money);
                 const recordMoney = convertCurrency(
                     deletedRecord.currency, account.currency, parseFloat(deletedRecord.money));
-                account.money = accountMoney +
-                    (deletedRecord.type === 'income' ? -recordMoney : recordMoney);
+                account.money = +accountMoney +
+                    (deletedRecord.type === 'income' ? -recordMoney : +recordMoney);
                 accountRef.update(account);
             }
         });
@@ -63,7 +63,7 @@ exports.updateAccountOnRecordDeletion = functions.database.ref('records/{userId}
 exports.updateAccountOnRecordUpdating = functions.database.ref('records/{userId}/{recordId}')
     .onUpdate(event => {
         const updatedRecord = event.data.val();
-        if (updatedRecord.planning) return;
+        if (updatedRecord.planning === 'true') return;
 
         const oldRecord = event.data.previous.val();
         const { userId } = event.params;
@@ -81,10 +81,10 @@ exports.updateAccountOnRecordUpdating = functions.database.ref('records/{userId}
                     updatedRecord.currency, oldAccount.currency, parseFloat(updatedRecord.money));
                 
                 if (oldRecordMoney !== updatedRecordMoney) {
-                    oldAccount.money = oldAccountMoney +
-                        (oldRecord.type === 'income' ? -oldRecordMoney : oldRecordMoney) + 
-                        (updatedAccountRef ? 0 : 
-                            (updatedRecord.type === 'income' ? updatedRecordMoney : -updatedRecordMoney));
+                    oldAccount.money = +oldAccountMoney +
+                        (oldRecord.type === 'income' ? -oldRecordMoney : +oldRecordMoney) + 
+                        (updatedAccountRef ? +0 : 
+                            (updatedRecord.type === 'income' ? +updatedRecordMoney : -updatedRecordMoney));
                     oldAccountRef.update(oldAccount);
                 }
             }
@@ -97,8 +97,8 @@ exports.updateAccountOnRecordUpdating = functions.database.ref('records/{userId}
                         const updRecordMoney = convertCurrency(
                             updatedRecord.currency, oldAccount.currency, parseFloat(updatedRecord.money));
                         
-                            updatedAccount.money = updatedAccountMoney + 
-                                (updatedRecord.type === 'income' ? updRecordMoney : -updRecordMoney);
+                            updatedAccount.money = +updatedAccountMoney + 
+                                (updatedRecord.type === 'income' ? +updRecordMoney : -updRecordMoney);
                             updatedAccountRef.update(updatedAccount);
                     }
                 });
@@ -168,13 +168,13 @@ exports.performPlanning = functions.https.onRequest((req, res) => {
                             const { record, key } = recordSnap;
                             const recordMoney = convertCurrency(
                                 record.currency, account.currency, parseFloat(record.money));
-                            moneyToUpdate += (record.type === 'income' ? recordMoney : -recordMoney);
+                            moneyToUpdate += (record.type === 'income' ? +recordMoney : -recordMoney);
 
                             record.planning = false;
                             recordsRef.child(userRecordsSnapshot.key).child(key).update(record);
                         }
 
-                        account.money = accountMoney + moneyToUpdate;
+                        account.money = +accountMoney + +moneyToUpdate;
                         accountsRef.child(userRecordsSnapshot.key).child(accountID).update(account);
                     }
                 });
@@ -183,4 +183,24 @@ exports.performPlanning = functions.https.onRequest((req, res) => {
 
         res.end();
     });
+});
+
+exports.addDefaultCategories = functions.auth.user().onCreate(event => {
+    const user = event.data;
+    const categoriesRef = db.ref('categories').child(user.uid);
+    const defaultCategories = {
+        'income': [
+            'Other', 'Gifts', 'Salary', 'Transfers', 'Winnings'
+        ],
+        'expenses': [
+            'Other', 'Friends', 'Family', 'Public service', 'Food', 'Restaurant',
+            'Education', 'Taxes', 'Medicine', 'Clothes', 'Transport', 'Sport'
+        ]
+    };
+
+    for (let categoryType in defaultCategories) {
+        defaultCategories[categoryType].forEach(category => {
+            categoriesRef.child(categoryType).push(category);
+        });
+    }
 });

@@ -74,7 +74,7 @@ class Expenses extends Component {
 
     addExpense(newRecord) {
         newRecord.type = 'expense';
-        newRecord.planning = false;
+        newRecord.planning = 'false';
         this.recordsRef.push(newRecord);
         this.toggleModalWindow('addWindow', 'expenseId');
     }

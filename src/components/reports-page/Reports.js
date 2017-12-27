@@ -102,7 +102,7 @@ class Reports extends Component {
             const newValue = (data[record.name] || 0) + +record.money;
             data[record.name] = newValue;
         });
-        const keys = Object.keys(data).sort((a, b) => data[b]-data[a]);
+        const keys = Object.keys(data).sort((a, b) => data[b] - data[a]);
         const values = [];
         keys.forEach(k => values.push(data[k]))
 
@@ -157,6 +157,8 @@ class Reports extends Component {
                 break;
             }
             case 'Date range': {
+                startDate = startDate.format('YYYY/MM/DD');
+                endDate = endDate.format('YYYY/MM/DD');
                 data = data.filter(record => record.date >= startDate && record.date <= endDate);
                 break;
             }
@@ -233,6 +235,18 @@ class Reports extends Component {
             }
 
             case 'Expenses': {
+                if (!data.length) {
+                    const canvas = document.getElementById('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const img = new Image();
+                    img.src = 'https://cdn.dribbble.com/users/1554526/screenshots/3399669/no_results_found.png';
+                    img.onload = function (a) {
+                        canvas.width = a.target.width;
+                        canvas.height = a.target.height;
+                        ctx.drawImage(img, 0, 0);
+                    };
+                    return;
+                }
                 const expenses = {};
                 data.forEach(record => {
                     const newValue = (expenses[record.category] || 0) + +record.money;
@@ -287,19 +301,23 @@ class Reports extends Component {
             </Form.Field>
         ) : null;
 
-        const daterange = period === chartConstants.DATE_RANGE_PERIOD ? (
-            <Form.Field className='datepicker-wrapper'>
-                <DatePicker
-                    placeholderText='Select start date' className='date-input' dateFormat='YYYY/MM/DD'
-                    onChange={(m) => this.onChangeDate(m, 'startDate')}
-                    selectsStart selected={startDate} startDate={startDate} endDate={endDate}
-                />
-                <DatePicker
-                    placeholderText='Select end date' className='date-input' dateFormat='YYYY/MM/DD'
-                    onChange={(m) => this.onChangeDate(m, 'endDate')}
-                    selectsEnd selected={endDate} startDate={startDate} endDate={endDate}
-                />
-            </Form.Field>
+        const daterange = (from === 'Expenses' && period === chartConstants.DATE_RANGE_PERIOD) ? (
+            <Form.Group widths='equal'>
+                <Form.Field>
+                    <DatePicker
+                        placeholderText='Start date' className='date-input' dateFormat='YYYY/MM/DD'
+                        onChange={(m) => this.onChangeDate(m, 'startDate')}
+                        selectsStart selected={startDate} startDate={startDate} endDate={endDate}
+                    />
+                </Form.Field>
+                <Form.Field>
+                    <DatePicker
+                        placeholderText='End date' className='date-input' dateFormat='YYYY/MM/DD'
+                        onChange={(m) => this.onChangeDate(m, 'endDate')}
+                        selectsEnd selected={endDate} startDate={startDate} endDate={endDate}
+                    />
+                </Form.Field>
+            </Form.Group>
         ) : null;
 
         return (
@@ -333,8 +351,8 @@ class Reports extends Component {
                             onClick={this.createReport} />
                     </Grid.Column>
                     <Grid.Column>
-                        <canvas id='canvas'/>
-                        <canvas id='categoriesChart'/>
+                        <canvas id='canvas' />
+                        <canvas id='categoriesChart' />
                     </Grid.Column>
                 </Grid>
             </Segment>

@@ -17,3 +17,7 @@
     display: block !important;
     margin: 15px auto !important;
 }
+
+#canvas {
+    width: 100%;
+}

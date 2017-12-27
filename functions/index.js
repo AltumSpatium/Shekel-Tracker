@@ -23,8 +23,9 @@ exports.updateAccountOnRecordAddition = functions.database.ref('records/{userId}
         const newRecord = event.data.val();
         if (newRecord.planning === 'true') return;
 
-        const { userId } = event.params;
+        const { userId, recordId } = event.params;
         const accountRef = db.ref(`accounts/${userId}`).child(newRecord.account);
+        const recordRef = db.ref('records').child(userId).child(recordId);
 
         return accountRef.once('value', snapshot => {
             const account = snapshot.val();
@@ -34,7 +35,12 @@ exports.updateAccountOnRecordAddition = functions.database.ref('records/{userId}
                     newRecord.currency, account.currency, parseFloat(newRecord.money));
                 account.money = +accountMoney + 
                     (newRecord.type === 'income' ? +recordMoney : -recordMoney);
-                accountRef.update(account);
+                accountRef.update(account).then(() => {
+                    const recordMoneyUSD = convertCurrency(
+                        newRecord.currency, 'USD', parseFloat(newRecord.money));
+                    newRecord.moneyUSD = '' + recordMoneyUSD;
+                    recordRef.update(newRecord);
+                });
             }
         });
 });
@@ -204,4 +210,16 @@ exports.addDefaultCategories = functions.auth.user().onCreate(event => {
             categoriesRef.child(categoryType).push(category);
         });
     }
+});
+
+exports.addUSDMoney = functions.database.ref('accounts/{userId}/{accountId}')
+    .onCreate(event => {
+        const newAccount = event.data.val();
+        const { userId, accountId } = event.params;
+        const accountRef = db.ref('accounts').child(userId).child(accountId);
+
+        const accountMoneyUSD = convertCurrency(
+            newAccount.currency, 'USD', parseFloat(newAccount.money));
+        newAccount.moneyUSD = '' + accountMoneyUSD;
+        accountRef.update(newAccount);
 });

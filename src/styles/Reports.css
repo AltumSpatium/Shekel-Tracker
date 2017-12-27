@@ -10,10 +10,10 @@
 }
 
 .datepicker-wrapper {
-    display: flex;
+    width: 50% !important;
 }
 
-.centered {
+.chart-create {
     display: block !important;
-    margin: 0 auto !important;
+    margin: 15px auto !important;
 }

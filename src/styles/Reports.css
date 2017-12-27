@@ -1,0 +1,23 @@
+.Reports {
+    width: 90%;
+    margin: 0 auto !important;
+}
+
+.reports-chart {
+    width: 80%;
+    margin: 0 auto;
+    max-width: 1300px;
+}
+
+.datepicker-wrapper {
+    width: 50% !important;
+}
+
+.chart-create {
+    display: block !important;
+    margin: 15px auto !important;
+}
+
+#canvas {
+    width: 100%;
+}
